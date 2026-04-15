@@ -1,10 +1,13 @@
-from fastapi import FastAPI, Form
+from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+
 from engines.strategy_engine import generate_strategy
 from engines.variation_engine import generate_variations
 from engines.content_generator import generate_content
 from engines.platform_adapter import adapt_platform
-from core.memory import save_memory
+
+from core.memory import save_memory, get_memory
 
 app = FastAPI()
 
@@ -51,3 +54,46 @@ def generate(goal: str = Form(...)):
 
 <a href="/">Back</a>
 """
+# app.py — Main entry point for DropMeOnline
+ 
+# Initialize FastAPI app
+app = FastAPI()
+ 
+# Point to templates folder
+templates = Jinja2Templates(directory="templates")
+ 
+# Root endpoint — serves index.html
+@app.get("/")
+def read_root(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+ 
+# Memory endpoint — shows past goals as HTML
+@app.get("/memory", response_class=HTMLResponse)
+def view_memory():
+    memory = get_memory()
+ 
+    # Build list items from past goals
+    items = "".join(
+        f"<li>{entry.get('goal', 'No goal')}</li>"
+        for entry in memory
+    ) or "<li>No memory yet.</li>"
+ 
+    html = f"""
+    <html>
+    <head>
+        <title>Memory — DropMeOnline</title>
+        <style>
+            body {{ font-family: Arial, sans-serif; max-width: 600px; margin: 60px auto; padding: 0 20px; }}
+            h1 {{ font-size: 22px; }}
+            li {{ padding: 8px 0; border-bottom: 1px solid #eee; }}
+        </style>
+    </head>
+    <body>
+        <h1>Past Goals</h1>
+        <ul>{items}</ul>
+        <br><a href="/">← Back</a>
+    </body>
+    </html>
+    """
+    return html
+ 
