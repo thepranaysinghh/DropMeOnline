@@ -20,6 +20,10 @@ def generate(goal: str = Form(...)):
 
     return f"""
     <h1>Strategy Generated</h1>
-    <p>{result['goal']}</p>
-    <a href="/">Back</a>
+    <p><b>Goal:</b> {result['goal']}</p>
+    <p><b>Niche:</b> {result['niche']}</p>
+    <p><b>Tone:</b> {result['tone']}</p>
+    <p><b>Posting:</b> {result['posting_frequency']}</p>
+   
+     <a href="/">Back</a>
     """
