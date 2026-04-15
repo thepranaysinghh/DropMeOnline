@@ -4,6 +4,7 @@ from engines.strategy_engine import generate_strategy
 from engines.variation_engine import generate_variations
 from engines.content_generator import generate_content
 from engines.platform_adapter import adapt_platform
+from core.memory import save_memory
 
 app = FastAPI()
 
@@ -20,6 +21,7 @@ def home():
 @app.post("/generate-strategy", response_class=HTMLResponse)
 def generate(goal: str = Form(...)):
     result = generate_strategy(goal)
+    save_memory(result)
     content = generate_content(goal)
     adapted = adapt_platform(content)
     variations = generate_variations(goal)
