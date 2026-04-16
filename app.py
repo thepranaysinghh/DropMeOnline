@@ -7,6 +7,7 @@ from engines.variation_engine import generate_variations
 from engines.platform_adapter import adapt_platform
 
 from core.memory import save_memory, get_memory
+from engines.smart_post_engine import decide_post_plan
 
 app = FastAPI()
 
@@ -264,6 +265,7 @@ def generate(goal: str = Form(...)):
     save_memory(result)
 
     content = generate_content(goal)
+    plan = decide_post_plan(goal)
     adapted = adapt_platform(content)
     variations = generate_variations(goal)
 
@@ -485,6 +487,31 @@ body::after {{
             </div>
         </div>
     </div>
+
+    <div class="card">
+    <div class="section-label">Posting Plan</div>
+
+    <div class="strategy-grid">
+        <div class="stat-box">
+            <div class="stat-label">LinkedIn</div>
+            <div class="stat-value">{plan['linkedin_frequency']}</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-label">Instagram</div>
+            <div class="stat-value">{plan['instagram_frequency']}</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-label">Twitter</div>
+            <div class="stat-value">{plan['twitter_frequency']}</div>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="post-text">{plan['reasoning']}</div>
+</div>
  
     <!-- Content Card -->
    <div class="card">
