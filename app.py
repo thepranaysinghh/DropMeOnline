@@ -487,22 +487,22 @@ body::after {{
     </div>
  
     <!-- Content Card -->
-    <div class="card">
-        <div class="section-label">Today's Content</div>
- 
-        <span class="platform-tag tag-linkedin">LinkedIn</span>
-        <p class="post-text">{content['linkedin']}</p>
- 
-        <div class="divider"></div>
- 
-        <span class="platform-tag tag-instagram">Instagram</span>
-        <p class="post-text">{content['instagram']}</p>
- 
-        <div class="divider"></div>
- 
-        <span class="platform-tag tag-twitter">Twitter / X</span>
-        <p class="post-text">{content['twitter']}</p>
-    </div>
+   <div class="card">
+    <div class="section-label">Content</div>
+
+    <div class="platform-tag tag-linkedin">LinkedIn</div>
+    <div class="post-text">{content['linkedin']}</div>
+
+    <div class="divider"></div>
+
+    <div class="platform-tag tag-instagram">Instagram</div>
+    <div class="post-text">{content['instagram']}</div>
+
+    <div class="divider"></div>
+
+    <div class="platform-tag tag-twitter">Twitter</div>
+    <div class="post-text">{content['twitter']}</div>
+</div>
  
     <!-- Variations Card -->
     <div class="card">
