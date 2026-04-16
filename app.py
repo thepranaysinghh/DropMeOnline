@@ -503,6 +503,23 @@ body::after {{
     <div class="platform-tag tag-twitter">Twitter</div>
     <div class="post-text">{content['twitter']}</div>
 </div>
+
+<div class="card">
+    <div class="section-label">Platform Adapted</div>
+
+    <div class="platform-tag tag-linkedin">LinkedIn</div>
+    <div class="post-text">{adapted['linkedin']}</div>
+
+    <div class="divider"></div>
+
+    <div class="platform-tag tag-instagram">Instagram</div>
+    <div class="post-text">{adapted['instagram']}</div>
+
+    <div class="divider"></div>
+
+    <div class="platform-tag tag-twitter">Twitter</div>
+    <div class="post-text">{adapted['twitter']}</div>
+</div>
  
     <!-- Variations Card -->
     <div class="card">
