@@ -605,12 +605,22 @@ body::after {{
     </button>
 </div>
 
-<script>
-function copyInstagram() {
-    navigator.clipboard.writeText(`{content['instagram']}`);
-    alert("Instagram caption copied! Paste it in app.");
-}
-</script>
+<div class="card">
+    <div class="section-label">Publish</div>
+
+    <a href="{links['linkedin_url']}" target="_blank" class="btn-home">
+        🚀 Publish on LinkedIn
+    </a>
+
+    <a href="{links['twitter_url']}" target="_blank" class="btn-home">
+        🐦 Publish on Twitter
+    </a>
+
+    <div class="post-text">
+        📸 Instagram Caption:<br><br>
+        {content['instagram']}
+    </div>
+</div>
  
 </body>
 </html>
