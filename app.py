@@ -196,6 +196,34 @@ def home():
 </head>
 <body>
  
+<div class="card">
+    <div class="section-label">Strategy</div>
+
+    <div class="strategy-grid">
+        <div class="stat-box">
+            <div class="stat-label">Niche</div>
+            <div class="stat-value">{result['niche']}</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-label">Tone</div>
+            <div class="stat-value">{result['tone']}</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-label">Posting</div>
+            <div class="stat-value">{result['posting_frequency']}</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-label">Goal</div>
+            <div class="stat-value">{result['goal']}</div>
+        </div>
+    </div>
+</div>
+
+    <div class="card">
+
     <div class="card">
  
         <div class="badge">AI Strategist</div>
