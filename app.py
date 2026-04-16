@@ -8,6 +8,7 @@ from engines.platform_adapter import adapt_platform
 
 from core.memory import save_memory, get_memory
 from engines.smart_post_engine import decide_post_plan
+from engines.growth_engine import decide_growth_strategy
 
 app = FastAPI()
 
@@ -266,6 +267,7 @@ def generate(goal: str = Form(...)):
 
     content = generate_content(goal)
     plan = decide_post_plan(goal)
+    growth = decide_growth_strategy(goal, "linkedin", {"engagement": "high", "last_posts": 5})
     adapted = adapt_platform(content)
     variations = generate_variations(goal)
 
@@ -490,6 +492,31 @@ body::after {{
 
     <div class="card">
     <div class="section-label">Posting Plan</div>
+
+    <div class="card">
+    <div class="section-label">Growth Strategy</div>
+
+    <div class="strategy-grid">
+        <div class="stat-box">
+            <div class="stat-label">Frequency</div>
+            <div class="stat-value">{growth['posting_frequency']}</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-label">Content Type</div>
+            <div class="stat-value">{growth['content_type']}</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-label">Hook Style</div>
+            <div class="stat-value">{growth['hook_style']}</div>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="post-text">{growth['notes']}</div>
+</div>
 
     <div class="strategy-grid">
         <div class="stat-box">
