@@ -9,6 +9,7 @@ from engines.platform_adapter import adapt_platform
 from core.memory import save_memory, get_memory
 from engines.smart_post_engine import decide_post_plan
 from engines.growth_engine import decide_growth_strategy
+from engines.publish_engine import generate_publish_links
 
 app = FastAPI()
 
@@ -269,6 +270,7 @@ def generate(goal: str = Form(...)):
     plan = decide_post_plan(goal)
     growth = decide_growth_strategy(goal, "linkedin", {"engagement": "high", "last_posts": 5})
     adapted = adapt_platform(content)
+    links = generate_publish_links(content)
     variations = generate_variations(goal)
 
     return f"""
@@ -586,6 +588,29 @@ body::after {{
     <a href="/" class="btn-home">← Generate New Strategy</a>
  
 </div>
+
+<div class="card">
+    <div class="section-label">Publish</div>
+
+    <a href="{links['linkedin_url']}" target="_blank" class="btn-home">
+        🚀 Publish on LinkedIn
+    </a>
+
+    <a href="{links['twitter_url']}" target="_blank" class="btn-home">
+        🐦 Publish on Twitter
+    </a>
+
+    <button class="btn-home" onclick="copyInstagram()">
+        📸 Copy for Instagram
+    </button>
+</div>
+
+<script>
+function copyInstagram() {
+    navigator.clipboard.writeText(`{content['instagram']}`);
+    alert("Instagram caption copied! Paste it in app.");
+}
+</script>
  
 </body>
 </html>
