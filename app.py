@@ -11,6 +11,7 @@ from engines.smart_post_engine import decide_post_plan
 from engines.growth_engine import decide_growth_strategy
 from engines.publish_engine import generate_publish_links
 from engines.brain_engine import analyze_and_decide
+from engines.feedback_engine import analyze_feedback
 
 app = FastAPI()
 
@@ -276,6 +277,13 @@ def generate(goal: str = Form(...)):
     "comments": 14,
     "post_time": "09:00",
     "frequency": "daily"
+})
+    feedback_result = analyze_feedback("linkedin", {
+    "reach": "medium",
+    "likes": "high",
+    "comments": "medium",
+    "time": "morning",
+    "overall": "good"
 })
     adapted = adapt_platform(content)
     links = generate_publish_links(content)
@@ -552,6 +560,33 @@ body::after {{
     <div class="divider"></div>
 
     <div class="post-text">{brain['reason']}</div>
+</div>
+
+<!-- Feedback Learning Card -->
+<div class="card">
+    <div class="section-label">Feedback Learning</div>
+
+    <div class="strategy-grid">
+        <div class="stat-box">
+            <div class="stat-label">Next Time</div>
+            <div class="stat-value">{feedback_result['next_time']}</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-label">Frequency</div>
+            <div class="stat-value">{feedback_result['frequency']}</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-label">Style</div>
+            <div class="stat-value">{feedback_result['content_style']}</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-label">Decision</div>
+            <div class="stat-value">{feedback_result['decision']}</div>
+        </div>
+    </div>
 </div>
 
     <div class="strategy-grid">
