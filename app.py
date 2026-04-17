@@ -589,6 +589,66 @@ body::after {{
     </div>
 </div>
 
+<!-- quick_feedback_form.html — Compact feedback form snippet -->
+<!-- Drop inside any page using existing glassmorphism card style -->
+ 
+<div class="card">
+ 
+    <div class="section-label">Update AI Learning</div>
+ 
+    <form action="/feedback" method="post">
+ 
+        <!-- Hidden platform field -->
+        <input type="hidden" name="platform" value="linkedin" />
+ 
+        <div class="form-row">
+ 
+            <div class="form-group">
+                <label>Reach</label>
+                <select name="reach">
+                    <option value="high">High</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="low">Low</option>
+                </select>
+            </div>
+ 
+            <div class="form-group">
+                <label>Likes</label>
+                <select name="likes">
+                    <option value="high">High</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="low">Low</option>
+                </select>
+            </div>
+ 
+            <div class="form-group">
+                <label>Comments</label>
+                <select name="comments">
+                    <option value="high">High</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="low">Low</option>
+                </select>
+            </div>
+ 
+            <div class="form-group">
+                <label>Overall</label>
+                <select name="overall">
+                    <option value="good">Good</option>
+                    <option value="average" selected>Average</option>
+                    <option value="bad">Bad</option>
+                </select>
+            </div>
+ 
+        </div>
+ 
+        <br>
+        <button type="submit" class="btn-home">Update AI Learning →</button>
+ 
+    </form>
+ 
+</div>
+ 
+
     <div class="strategy-grid">
         <div class="stat-box">
             <div class="stat-label">LinkedIn</div>
@@ -694,6 +754,32 @@ body::after {{
 </body>
 </html>
  
+    """
+
+@app.post("/update-feedback", response_class=HTMLResponse)
+def update_feedback(
+    reach: str = Form(...),
+    likes: str = Form(...),
+    comments: str = Form(...),
+    overall: str = Form(...),
+    platform: str = Form(...)
+):
+    result = analyze_feedback(platform, {
+        "reach": reach,
+        "likes": likes,
+        "comments": comments,
+        "time": "recent",
+        "overall": overall
+    })
+
+    return f"""
+    <h1>AI Learning Updated</h1>
+    <p>Platform: {platform}</p>
+    <p>Next Time: {result['next_time']}</p>
+    <p>Frequency: {result['frequency']}</p>
+    <p>Style: {result['content_style']}</p>
+    <p>Decision: {result['decision']}</p>
+    <a href="/">Back</a>
     """
 
 
