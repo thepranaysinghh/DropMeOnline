@@ -10,6 +10,7 @@ from core.memory import save_memory, get_memory
 from engines.smart_post_engine import decide_post_plan
 from engines.growth_engine import decide_growth_strategy
 from engines.publish_engine import generate_publish_links
+from engines.brain_engine import analyze_and_decide
 
 app = FastAPI()
 
@@ -269,6 +270,13 @@ def generate(goal: str = Form(...)):
     content = generate_content(goal)
     plan = decide_post_plan(goal)
     growth = decide_growth_strategy(goal, "linkedin", {"engagement": "high", "last_posts": 5})
+    brain = analyze_and_decide("linkedin", {
+    "reach": 1200,
+    "likes": 85,
+    "comments": 14,
+    "post_time": "09:00",
+    "frequency": "daily"
+})
     adapted = adapt_platform(content)
     links = generate_publish_links(content)
     variations = generate_variations(goal)
@@ -518,6 +526,32 @@ body::after {{
     <div class="divider"></div>
 
     <div class="post-text">{growth['notes']}</div>
+</div>
+
+<!-- AI Brain Decision Card -->
+<div class="card">
+    <div class="section-label">AI Brain Decision</div>
+
+    <div class="strategy-grid">
+        <div class="stat-box">
+            <div class="stat-label">Next Post Time</div>
+            <div class="stat-value">{brain['next_post_time']}</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-label">Frequency</div>
+            <div class="stat-value">{brain['frequency_change']}</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-label">Content Style</div>
+            <div class="stat-value">{brain['content_style']}</div>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="post-text">{brain['reason']}</div>
 </div>
 
     <div class="strategy-grid">
