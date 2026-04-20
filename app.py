@@ -15,6 +15,7 @@ from engines.feedback_engine import analyze_feedback
 from engines.prompt_brain import understand_prompt
 from engines.campaign_engine import generate_campaign
 from engines.distribution_engine import create_distribution_plan
+from engines.conversion_engine import generate_conversion_assets
 
 app = FastAPI()
 
@@ -298,6 +299,7 @@ def generate(goal: str = Form(...)):
     prompt_data['platforms'] if prompt_data['platforms'] else ["linkedin"],
     2
 )
+    conversion = generate_conversion_assets(goal)
 
     return f"""
    <!DOCTYPE html>
@@ -829,6 +831,30 @@ body::after {{
     <div class="post-text" style="margin-top:12px;">
         Showing first 10 rollout actions.
     </div>
+</div>
+
+<!-- Conversion Engine Card -->
+<div class="card">
+    <div class="section-label">Conversion Assets</div>
+
+    <div class="post-text"><b>CTA:</b></div>
+    <ul class="variation-list">
+        {''.join(f"<li>{x}</li>" for x in conversion['cta'][:3])}
+    </ul>
+
+    <div class="divider"></div>
+
+    <div class="post-text"><b>Urgency:</b></div>
+    <ul class="variation-list">
+        {''.join(f"<li>{x}</li>" for x in conversion['urgency'][:2])}
+    </ul>
+
+    <div class="divider"></div>
+
+    <div class="post-text"><b>Trust:</b></div>
+    <ul class="variation-list">
+        {''.join(f"<li>{x}</li>" for x in conversion['trust'][:2])}
+    </ul>
 </div>
  
 </body>
