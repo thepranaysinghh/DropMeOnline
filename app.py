@@ -861,21 +861,39 @@ body::after {{
 
 <!-- Visual Assets Card -->
 <div class="card">
-    <div class="section-label">Visual Assets</div>
+    <div class="section-label">Visual Production Engine</div>
 
     <div class="post-text"><b>LinkedIn Carousel:</b> {visuals['linkedin_carousel']['headline']}</div>
     <ul class="variation-list">
-        {''.join(f"<li>{slide}</li>" for slide in visuals['linkedin_carousel']['slides'][:5])}
+        {''.join(f"<li>{x}</li>" for x in visuals['linkedin_carousel']['slides'][:5])}
     </ul>
 
     <div class="divider"></div>
 
-    <div class="post-text"><b>Instagram Post:</b> {visuals['instagram_post']['headline']}</div>
+    <div class="post-text"><b>Instagram Creative:</b> {visuals['instagram_post']['headline']}</div>
     <div class="post-text">{visuals['instagram_post']['caption_text']}</div>
 
     <div class="divider"></div>
 
     <div class="post-text"><b>Twitter Graphic:</b> {visuals['twitter_graphic']['headline']}</div>
+
+    <div class="divider"></div>
+
+    <div class="post-text"><b>Image Prompts:</b></div>
+    <ul class="variation-list">
+        <li>LinkedIn: {visuals['image_prompts']['linkedin']}</li>
+        <li>Instagram: {visuals['image_prompts']['instagram']}</li>
+        <li>Twitter: {visuals['image_prompts']['twitter']}</li>
+    </ul>
+
+    <div class="divider"></div>
+
+    <div class="post-text"><b>Creative Style:</b></div>
+    <ul class="variation-list">
+        <li>LinkedIn: {visuals['styles']['linkedin']}</li>
+        <li>Instagram: {visuals['styles']['instagram']}</li>
+        <li>Twitter: {visuals['styles']['twitter']}</li>
+    </ul>
 </div>
  
 </body>
