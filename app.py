@@ -773,13 +773,293 @@ def update_feedback(
     })
 
     return f"""
-    <h1>AI Learning Updated</h1>
-    <p>Platform: {platform}</p>
-    <p>Next Time: {result['next_time']}</p>
-    <p>Frequency: {result['frequency']}</p>
-    <p>Style: {result['content_style']}</p>
-    <p>Decision: {result['decision']}</p>
-    <a href="/">Back</a>
+    <html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Learning Updated — DropMeOnline</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {{ margin:0; padding:0; box-sizing:border-box; }}
+
+        body {{
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #1a1a3e 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            overflow-x: hidden;
+        }}
+
+        /* Ambient orbs */
+        .orb {{ position:fixed; border-radius:50%; filter:blur(90px); pointer-events:none; z-index:0; }}
+        .orb-1 {{ width:480px; height:480px; background:#6d28d9; opacity:0.2; top:-120px; left:-120px; }}
+        .orb-2 {{ width:380px; height:380px; background:#1d4ed8; opacity:0.18; bottom:-80px; right:-80px; }}
+
+        .wrapper {{
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 580px;
+        }}
+
+        /* Back link */
+        .back {{
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: rgba(255,255,255,0.3);
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-decoration: none;
+            margin-bottom: 28px;
+            transition: color 0.2s;
+        }}
+        .back:hover {{ color: #a78bfa; }}
+
+        /* Success banner */
+        .banner {{
+            background: linear-gradient(135deg, rgba(109,40,217,0.3), rgba(37,99,235,0.25));
+            border: 1px solid rgba(167,139,250,0.25);
+            border-radius: 20px;
+            padding: 28px 32px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(109,40,217,0.15);
+        }}
+
+        .banner-icon {{
+            font-size: 36px;
+            margin-bottom: 12px;
+            display: block;
+        }}
+
+        .banner-title {{
+            font-family: 'Syne', sans-serif;
+            font-size: 26px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.3px;
+            margin-bottom: 6px;
+        }}
+
+        .banner-sub {{
+            font-size: 13px;
+            color: rgba(255,255,255,0.4);
+        }}
+
+        /* Glass card */
+        .card {{
+            background: rgba(255,255,255,0.06);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            padding: 32px;
+            margin-bottom: 16px;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.07);
+        }}
+
+        .section-label {{
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: #7c3aed;
+            margin-bottom: 18px;
+        }}
+
+        /* Stats grid */
+        .grid {{
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }}
+
+        .stat {{
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 14px;
+            padding: 16px 18px;
+            transition: border-color 0.25s, background 0.25s;
+        }}
+        .stat:hover {{ border-color: rgba(124,58,237,0.35); background: rgba(124,58,237,0.06); }}
+
+        .stat-full {{ grid-column: span 2; }}
+
+        .stat-label {{
+            font-size: 10px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.28);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 8px;
+        }}
+
+        .stat-value {{
+            font-size: 15px;
+            font-weight: 500;
+            color: #e2e8f0;
+            line-height: 1.4;
+        }}
+
+        /* Platform pill */
+        .platform-pill {{
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(37,99,235,0.2);
+            border: 1px solid rgba(37,99,235,0.35);
+            color: #93c5fd;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 6px 16px;
+            border-radius: 20px;
+            text-transform: capitalize;
+        }}
+
+        /* Decision badge */
+        .badge {{
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }}
+        .badge-keep   {{ background: rgba(134,239,172,0.12); border: 1px solid rgba(134,239,172,0.3); color: #86efac; }}
+        .badge-change {{ background: rgba(252,165,165,0.12); border: 1px solid rgba(252,165,165,0.3); color: #fca5a5; }}
+
+        /* Style value */
+        .style-value {{
+            font-size: 14px;
+            font-weight: 400;
+            color: #c4b5fd;
+            line-height: 1.7;
+        }}
+
+        /* Divider */
+        .divider {{
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.07), transparent);
+            margin: 6px 0 18px;
+        }}
+
+        /* Buttons */
+        .btn-row {{
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 8px;
+        }}
+
+        .btn-primary {{
+            display: block;
+            text-align: center;
+            padding: 14px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            letter-spacing: 0.3px;
+            color: #ffffff;
+            background: linear-gradient(135deg, #6d28d9, #2563eb);
+            border-radius: 12px;
+            text-decoration: none;
+            box-shadow: 0 6px 24px rgba(109,40,217,0.35);
+            transition: opacity 0.2s, transform 0.15s;
+        }}
+        .btn-primary:hover {{ opacity:0.88; transform:translateY(-2px); }}
+
+        .btn-secondary {{
+            display: block;
+            text-align: center;
+            padding: 14px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            letter-spacing: 0.3px;
+            color: rgba(255,255,255,0.6);
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            text-decoration: none;
+            transition: background 0.2s, color 0.2s;
+        }}
+        .btn-secondary:hover {{ background: rgba(255,255,255,0.09); color: #fff; }}
+    </style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="wrapper">
+
+    <a href="/" class="back">← Back to Home</a>
+
+    <!-- Success banner -->
+    <div class="banner">
+        <span class="banner-icon">🧠</span>
+        <div class="banner-title">AI Learning Updated</div>
+        <div class="banner-sub">Strategy adjusted based on your feedback</div>
+    </div>
+
+    <!-- Result card -->
+    <div class="card">
+        <div class="section-label">Updated Strategy</div>
+
+        <div class="grid">
+
+            <div class="stat">
+                <div class="stat-label">Platform</div>
+                <div class="stat-value">
+                    <span class="platform-pill">{platform}</span>
+                </div>
+            </div>
+
+            <div class="stat">
+                <div class="stat-label">Decision</div>
+                <div class="stat-value">
+                    <span class="badge badge-{result['decision']}">{result['decision'].upper()}</span>
+                </div>
+            </div>
+
+            <div class="stat">
+                <div class="stat-label">Next Post Time</div>
+                <div class="stat-value">{result['next_time']}</div>
+            </div>
+
+            <div class="stat">
+                <div class="stat-label">Frequency</div>
+                <div class="stat-value">{result['frequency']}</div>
+            </div>
+
+            <div class="divider" style="grid-column:span 2; margin:4px 0;"></div>
+
+            <div class="stat stat-full">
+                <div class="stat-label">Recommended Style</div>
+                <div class="style-value">{result['content_style']}</div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="btn-row">
+        <a href="/" class="btn-secondary">← Home</a>
+        <a href="/" class="btn-primary">New Strategy →</a>
+    </div>
+
+</div>
+
+</body>
+</html>
     """
 
 
