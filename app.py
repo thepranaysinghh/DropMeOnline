@@ -16,6 +16,7 @@ from engines.prompt_brain import understand_prompt
 from engines.campaign_engine import generate_campaign
 from engines.distribution_engine import create_distribution_plan
 from engines.conversion_engine import generate_conversion_assets
+from engines.visual_engine import generate_visual_assets
 
 app = FastAPI()
 
@@ -300,6 +301,7 @@ def generate(goal: str = Form(...)):
     2
 )
     conversion = generate_conversion_assets(goal)
+    visuals = generate_visual_assets(goal, content['linkedin'])
 
     return f"""
    <!DOCTYPE html>
@@ -855,6 +857,25 @@ body::after {{
     <ul class="variation-list">
         {''.join(f"<li>{x}</li>" for x in conversion['trust'][:2])}
     </ul>
+</div>
+
+<!-- Visual Assets Card -->
+<div class="card">
+    <div class="section-label">Visual Assets</div>
+
+    <div class="post-text"><b>LinkedIn Carousel:</b> {visuals['linkedin_carousel']['headline']}</div>
+    <ul class="variation-list">
+        {''.join(f"<li>{slide}</li>" for slide in visuals['linkedin_carousel']['slides'][:5])}
+    </ul>
+
+    <div class="divider"></div>
+
+    <div class="post-text"><b>Instagram Post:</b> {visuals['instagram_post']['headline']}</div>
+    <div class="post-text">{visuals['instagram_post']['caption_text']}</div>
+
+    <div class="divider"></div>
+
+    <div class="post-text"><b>Twitter Graphic:</b> {visuals['twitter_graphic']['headline']}</div>
 </div>
  
 </body>
