@@ -14,6 +14,7 @@ from engines.brain_engine import analyze_and_decide
 from engines.feedback_engine import analyze_feedback
 from engines.prompt_brain import understand_prompt
 from engines.campaign_engine import generate_campaign
+from engines.distribution_engine import create_distribution_plan
 
 app = FastAPI()
 
@@ -292,6 +293,11 @@ def generate(goal: str = Form(...)):
     links = generate_publish_links(content)
     variations = generate_variations(goal)
     campaign = generate_campaign(goal, 30, prompt_data['platforms'] if prompt_data['platforms'] else ["linkedin"])
+    distribution = create_distribution_plan(
+    30,
+    prompt_data['platforms'] if prompt_data['platforms'] else ["linkedin"],
+    2
+)
 
     return f"""
    <!DOCTYPE html>
@@ -806,6 +812,22 @@ body::after {{
 
     <div class="post-text" style="margin-top:12px;">
         Showing first 10 days preview.
+    </div>
+</div>
+
+<!-- Distribution Plan Card -->
+<div class="card">
+    <div class="section-label">Distribution Plan</div>
+
+    <ul class="variation-list">
+        {''.join(
+            f"<li><b>Day {item['day']}:</b> {item['platform'].title()} Page {item['page']} — {item['post_type']}</li>"
+            for item in distribution[:10]
+        )}
+    </ul>
+
+    <div class="post-text" style="margin-top:12px;">
+        Showing first 10 rollout actions.
     </div>
 </div>
  
