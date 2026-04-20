@@ -18,6 +18,7 @@ from engines.distribution_engine import create_distribution_plan
 from engines.conversion_engine import generate_conversion_assets
 from engines.visual_engine import generate_visual_assets
 from engines.competitor_engine import analyze_market
+from engines.publishing_engine import build_publish_queue
 
 app = FastAPI()
 
@@ -304,6 +305,10 @@ def generate(goal: str = Form(...)):
     conversion = generate_conversion_assets(goal)
     visuals = generate_visual_assets(goal, content['linkedin'])
     market = analyze_market(goal)
+    publish = build_publish_queue(
+    campaign,
+    prompt_data['platforms'] if prompt_data['platforms'] else ["linkedin"]
+)
 
     return f"""
    <!DOCTYPE html>
@@ -926,6 +931,30 @@ body::after {{
     <div class="post-text"><b>Viral Hooks:</b></div>
     <ul class="variation-list">
         {''.join(f"<li>{x}</li>" for x in market['viral_hooks'][:3])}
+    </ul>
+</div>
+
+<!-- Publishing Workflow Card -->
+<div class="card">
+    <div class="section-label">Publishing Workflow</div>
+
+    <div class="post-text"><b>Today's Ready Posts:</b></div>
+    <ul class="variation-list">
+        {''.join(f"<li>{x['platform'].title()} — {x['title']} ({x['status']})</li>" for x in publish['today'][:5])}
+    </ul>
+
+    <div class="divider"></div>
+
+    <div class="post-text"><b>Upcoming Queue:</b></div>
+    <ul class="variation-list">
+        {''.join(f"<li>Day {x['day']} — {x['platform'].title()} — {x['title']}</li>" for x in publish['upcoming'][:5])}
+    </ul>
+
+    <div class="divider"></div>
+
+    <div class="post-text"><b>Actions:</b></div>
+    <ul class="variation-list">
+        {''.join(f"<li>{x}</li>" for x in publish['actions'][:5])}
     </ul>
 </div>
  
