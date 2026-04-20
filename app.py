@@ -17,6 +17,7 @@ from engines.campaign_engine import generate_campaign
 from engines.distribution_engine import create_distribution_plan
 from engines.conversion_engine import generate_conversion_assets
 from engines.visual_engine import generate_visual_assets
+from engines.competitor_engine import analyze_market
 
 app = FastAPI()
 
@@ -302,6 +303,7 @@ def generate(goal: str = Form(...)):
 )
     conversion = generate_conversion_assets(goal)
     visuals = generate_visual_assets(goal, content['linkedin'])
+    market = analyze_market(goal)
 
     return f"""
    <!DOCTYPE html>
@@ -893,6 +895,37 @@ body::after {{
         <li>LinkedIn: {visuals['styles']['linkedin']}</li>
         <li>Instagram: {visuals['styles']['instagram']}</li>
         <li>Twitter: {visuals['styles']['twitter']}</li>
+    </ul>
+</div>
+
+<!-- Competitor Intelligence Card -->
+<div class="card">
+    <div class="section-label">Competitor Intelligence</div>
+
+    <div class="post-text"><b>Competitors:</b></div>
+    <ul class="variation-list">
+        {''.join(f"<li>{x}</li>" for x in market['competitors'][:3])}
+    </ul>
+
+    <div class="divider"></div>
+
+    <div class="post-text"><b>Trends:</b></div>
+    <ul class="variation-list">
+        {''.join(f"<li>{x}</li>" for x in market['trends'][:3])}
+    </ul>
+
+    <div class="divider"></div>
+
+    <div class="post-text"><b>Opportunities:</b></div>
+    <ul class="variation-list">
+        {''.join(f"<li>{x}</li>" for x in market['opportunities'][:3])}
+    </ul>
+
+    <div class="divider"></div>
+
+    <div class="post-text"><b>Viral Hooks:</b></div>
+    <ul class="variation-list">
+        {''.join(f"<li>{x}</li>" for x in market['viral_hooks'][:3])}
     </ul>
 </div>
  
