@@ -562,6 +562,17 @@ body::after {{
             <div class="stat-label">Tone</div>
             <div class="stat-value">{prompt_data['tone']}</div>
         </div>
+
+        <div class="stat-box">
+    <div class="stat-label">Platforms</div>
+    <div class="stat-value">{', '.join(prompt_data['platforms']) if prompt_data['platforms'] else 'Not specified'}</div>
+</div>
+
+<div class="stat-box">
+    <div class="stat-label">Suggestions</div>
+    <div class="stat-value">{', '.join(prompt_data['suggested_platforms']) if prompt_data['suggested_platforms'] else 'None'}</div>
+</div>
+
     </div>
 </div>
 
