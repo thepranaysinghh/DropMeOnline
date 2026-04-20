@@ -4,7 +4,7 @@ def understand_prompt(user_prompt: str) -> dict:
     """
     Input:  user_prompt (string) — natural language description
             e.g. "I have an AI resume tool for freshers. Need 100 users in 30 days. Zero budget."
-    Output: structured dict with product, audience, goal, tone, budget, platforms
+    Output: structured dict with product, audience, goal, tone, budget, platforms, suggested_platforms
     Note:   Keyword-based extraction (AI-powered version in future phase)
     """
 
@@ -24,6 +24,10 @@ def understand_prompt(user_prompt: str) -> dict:
         "course":     "Online Course",
         "blog":       "Blog / Content Site",
         "agency":     "Agency Service",
+        "fashion":    "Fashion Brand",
+        "food":       "Food / Restaurant",
+        "fitness":    "Fitness Product",
+        "game":       "Game / Gaming Product",
     }
     for keyword, label in product_keywords.items():
         if keyword in text:
@@ -52,9 +56,9 @@ def understand_prompt(user_prompt: str) -> dict:
     # --- Extract GOAL ---
     goal = "Grow brand awareness"
     import re
-    user_match = re.search(r'(\d+)\s*users?', text)
+    user_match     = re.search(r'(\d+)\s*users?', text)
     follower_match = re.search(r'(\d+)\s*followers?', text)
-    sale_match = re.search(r'(\d+)\s*sales?', text)
+    sale_match     = re.search(r'(\d+)\s*sales?', text)
 
     if user_match:
         goal = f"Get {user_match.group(1)} users"
@@ -72,14 +76,14 @@ def understand_prompt(user_prompt: str) -> dict:
     # --- Extract TONE ---
     tone = "Professional + Engaging"
     tone_keywords = {
-        "casual":        "Casual + Friendly",
-        "fun":           "Fun + Energetic",
-        "professional":  "Professional + Authoritative",
-        "gen z":         "Gen Z + Trendy",
-        "motivational":  "Motivational + Inspiring",
-        "educational":   "Educational + Informative",
-        "bold":          "Bold + Direct",
-        "storytelling":  "Story-driven + Emotional",
+        "casual":       "Casual + Friendly",
+        "fun":          "Fun + Energetic",
+        "professional": "Professional + Authoritative",
+        "gen z":        "Gen Z + Trendy",
+        "motivational": "Motivational + Inspiring",
+        "educational":  "Educational + Informative",
+        "bold":         "Bold + Direct",
+        "storytelling": "Story-driven + Emotional",
     }
     for keyword, label in tone_keywords.items():
         if keyword in text:
@@ -95,7 +99,7 @@ def understand_prompt(user_prompt: str) -> dict:
     elif any(word in text for word in ["paid", "ads", "sponsored", "budget"]):
         budget = "Paid / Has Budget"
 
-    # --- Extract PLATFORMS ---
+    # --- Extract PLATFORMS (user-mentioned only) ---
     platforms = []
     platform_map = {
         "linkedin":  "linkedin",
@@ -110,15 +114,36 @@ def understand_prompt(user_prompt: str) -> dict:
         if keyword in text:
             platforms.append(platform)
 
-    # Default to top 3 if none detected
+    # --- SUGGESTED PLATFORMS (only if user didn't mention any) ---
+    suggested_platforms = []
+
     if not platforms:
-        platforms = ["linkedin", "instagram", "twitter"]
+        # Smart suggestions based on product/audience niche
+        if any(w in text for w in ["ai", "tech", "developer", "saas", "tool", "resume", "startup"]):
+            suggested_platforms = ["linkedin", "twitter"]
+
+        elif any(w in text for w in ["fashion", "beauty", "food", "fitness", "lifestyle", "art"]):
+            suggested_platforms = ["instagram", "tiktok"]
+
+        elif any(w in text for w in ["course", "education", "learning", "tutorial"]):
+            suggested_platforms = ["youtube", "linkedin"]
+
+        elif any(w in text for w in ["game", "gaming", "entertainment"]):
+            suggested_platforms = ["twitter", "reddit"]
+
+        elif any(w in text for w in ["local", "shop", "store", "restaurant"]):
+            suggested_platforms = ["facebook", "instagram"]
+
+        else:
+            # Generic fallback suggestion
+            suggested_platforms = ["linkedin", "instagram"]
 
     return {
-        "product":   product,
-        "audience":  audience,
-        "goal":      goal,
-        "tone":      tone,
-        "budget":    budget,
-        "platforms": platforms
+        "product":             product,
+        "audience":            audience,
+        "goal":                goal,
+        "tone":                tone,
+        "budget":              budget,
+        "platforms":           platforms,           # User-mentioned (respect their choice)
+        "suggested_platforms": suggested_platforms  # AI recommendation (only if none mentioned)
     }
