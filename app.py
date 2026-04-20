@@ -19,6 +19,7 @@ from engines.conversion_engine import generate_conversion_assets
 from engines.visual_engine import generate_visual_assets
 from engines.competitor_engine import analyze_market
 from engines.publishing_engine import build_publish_queue
+from engines.mastermind_engine import build_mastermind
 
 app = FastAPI()
 
@@ -274,6 +275,7 @@ def home():
 def generate(goal: str = Form(...)):
     result = generate_strategy(goal)
     prompt_data = understand_prompt(goal)
+    mind = build_mastermind(goal, prompt_data)
     save_memory(result)
 
     content = generate_content(goal)
@@ -594,6 +596,45 @@ body::after {{
 
     </div>
 </div>
+
+<!-- Mastermind Brain Card -->
+<div class="card">
+    <div class="section-label">Mastermind Brain</div>
+
+    <div class="strategy-grid">
+        <div class="stat-box">
+            <div class="stat-label">Core Angle</div>
+            <div class="stat-value">{mind['core_angle']}</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-label">Trigger</div>
+            <div class="stat-value">{mind['psychology_trigger']}</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-label">Hook Style</div>
+            <div class="stat-value">{mind['hook_style']}</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-label">Tone</div>
+            <div class="stat-value">{mind['tone']}</div>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="post-text"><b>Top Hooks:</b></div>
+    <ul class="variation-list">
+        {''.join(f"<li>{x}</li>" for x in mind['top_hooks'][:3])}
+    </ul>
+
+    <div class="divider"></div>
+
+    <div class="post-text"><b>CTA Style:</b> {mind['cta_style']}</div>
+</div>
+
 
 <!-- AI Brain Decision Card -->
 <div class="card">
