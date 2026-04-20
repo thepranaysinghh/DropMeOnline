@@ -13,6 +13,7 @@ from engines.publish_engine import generate_publish_links
 from engines.brain_engine import analyze_and_decide
 from engines.feedback_engine import analyze_feedback
 from engines.prompt_brain import understand_prompt
+from engines.campaign_engine import generate_campaign
 
 app = FastAPI()
 
@@ -290,6 +291,7 @@ def generate(goal: str = Form(...)):
     adapted = adapt_platform(content)
     links = generate_publish_links(content)
     variations = generate_variations(goal)
+    campaign = generate_campaign(goal, 30, prompt_data['platforms'] if prompt_data['platforms'] else ["linkedin"])
 
     return f"""
    <!DOCTYPE html>
@@ -788,6 +790,22 @@ body::after {{
     <div class="post-text">
         📸 Instagram Caption:<br><br>
         {content['instagram']}
+    </div>
+</div>
+
+<!-- Campaign Plan Card -->
+<div class="card">
+    <div class="section-label">30 Day Campaign Plan</div>
+
+    <ul class="variation-list">
+        {''.join(
+            f"<li><b>Day {item['day']}:</b> {item['theme']} — {item['hook']}</li>"
+            for item in campaign[:10]
+        )}
+    </ul>
+
+    <div class="post-text" style="margin-top:12px;">
+        Showing first 10 days preview.
     </div>
 </div>
  
