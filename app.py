@@ -12,6 +12,7 @@ from engines.growth_engine import decide_growth_strategy
 from engines.publish_engine import generate_publish_links
 from engines.brain_engine import analyze_and_decide
 from engines.feedback_engine import analyze_feedback
+from engines.prompt_brain import understand_prompt
 
 app = FastAPI()
 
@@ -266,6 +267,7 @@ def home():
 @app.post("/generate-strategy", response_class=HTMLResponse)
 def generate(goal: str = Form(...)):
     result = generate_strategy(goal)
+    prompt_data = understand_prompt(goal)
     save_memory(result)
 
     content = generate_content(goal)
@@ -534,6 +536,33 @@ body::after {{
     <div class="divider"></div>
 
     <div class="post-text">{growth['notes']}</div>
+</div>
+
+<!-- Prompt Understanding Card -->
+<div class="card">
+    <div class="section-label">Prompt Understanding</div>
+
+    <div class="strategy-grid">
+        <div class="stat-box">
+            <div class="stat-label">Product</div>
+            <div class="stat-value">{prompt_data['product']}</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-label">Audience</div>
+            <div class="stat-value">{prompt_data['audience']}</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-label">Goal</div>
+            <div class="stat-value">{prompt_data['goal']}</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-label">Tone</div>
+            <div class="stat-value">{prompt_data['tone']}</div>
+        </div>
+    </div>
 </div>
 
 <!-- AI Brain Decision Card -->
