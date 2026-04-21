@@ -21,6 +21,7 @@ from engines.competitor_engine import analyze_market
 from engines.publishing_engine import build_publish_queue
 from engines.mastermind_engine import build_mastermind
 from engines.autopilot_content_engine import generate_autopilot_content
+from engines.orchestrator_engine import orchestrate
 
 app = FastAPI()
 
@@ -252,6 +253,7 @@ def generate(goal: str = Form(...)):
     result = generate_strategy(goal)
     prompt_data = understand_prompt(goal)
     mind = build_mastermind(goal, prompt_data)
+    flow = orchestrate(goal, prompt_data)
     save_memory(result)
 
     content = generate_content(goal)
@@ -616,6 +618,51 @@ body::after {{
     <div class="divider"></div>
 
     <div class="post-text"><b>CTA Style:</b> {mind['cta_style']}</div>
+</div>
+
+<!-- Orchestrator Engine Card -->
+<div class="card">
+    <div class="section-label">Orchestrator Engine</div>
+
+    <div class="strategy-grid">
+        <div class="stat-box">
+            <div class="stat-label">Priority Engine</div>
+            <div class="stat-value">{flow['priority_engine']}</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-label">Platform</div>
+            <div class="stat-value">{flow['recommended_platform']}</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-label">Tone Lock</div>
+            <div class="stat-value">{flow['tone_lock']}</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-label">Focus</div>
+            <div class="stat-value">{flow['final_focus']}</div>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="post-text"><b>Content Strategy:</b> {flow['content_strategy']}</div>
+
+    <div class="divider"></div>
+
+    <div class="post-text"><b>Quality Checks:</b></div>
+    <ul class="variation-list">
+        {''.join(f"<li>{x}</li>" for x in flow['quality_checks'][:3])}
+    </ul>
+
+    <div class="divider"></div>
+
+    <div class="post-text"><b>Next Actions:</b></div>
+    <ul class="variation-list">
+        {''.join(f"<li>{x}</li>" for x in flow['next_actions'][:3])}
+    </ul>
 </div>
 
 
