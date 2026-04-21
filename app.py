@@ -262,7 +262,8 @@ def generate(goal: str = Form(...)):
     prompt_data['platforms'][0] if prompt_data['platforms'] else "linkedin",
     result['niche'],
     prompt_data['audience'],
-    []
+    [],
+    mind
 )
     plan = decide_post_plan(goal)
     growth = decide_growth_strategy(goal, "linkedin", {"engagement": "high", "last_posts": 5})
