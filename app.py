@@ -23,6 +23,7 @@ from engines.mastermind_engine import build_mastermind
 from engines.autopilot_content_engine import generate_autopilot_content
 from engines.orchestrator_engine import orchestrate
 from engines.trend_radar_engine import scan_trends
+from engines.analytics_engine import generate_dashboard_stats
 
 app = FastAPI()
 
@@ -261,6 +262,7 @@ def generate(goal: str = Form(...)):
     prompt_data['audience'],
     prompt_data['platforms'][0] if prompt_data['platforms'] else "linkedin"
 )
+    stats = generate_dashboard_stats()
     save_memory(result)
 
     content = generate_content(goal)
@@ -701,6 +703,48 @@ body::after {{
     <ul class="variation-list">
         {''.join(f"<li>{x}</li>" for x in trends['content_opportunities'][:3])}
     </ul>
+</div>
+
+<!-- Analytics Dashboard Card -->
+<div class="card">
+    <div class="section-label">Analytics Dashboard</div>
+
+    <div class="strategy-grid">
+        <div class="stat-box">
+            <div class="stat-label">Posts</div>
+            <div class="stat-value">{stats['posts_generated']}</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-label">Campaigns</div>
+            <div class="stat-value">{stats['campaigns_created']}</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-label">Best Platform</div>
+            <div class="stat-value">{stats['best_platform_today']}</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-label">Growth Score</div>
+            <div class="stat-value">{stats['growth_score']}</div>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="post-text"><b>Next Action:</b> {stats['next_action']}</div>
+
+    <div class="divider"></div>
+
+    <div class="post-text"><b>Recent Activity:</b></div>
+    <ul class="variation-list">
+        {''.join(f"<li>{x}</li>" for x in stats['recent_activity'][:3])}
+    </ul>
+
+    <div class="divider"></div>
+
+    <div class="post-text"><b>Status:</b> {stats['system_status']}</div>
 </div>
 
 
