@@ -22,6 +22,7 @@ from engines.publishing_engine import build_publish_queue
 from engines.mastermind_engine import build_mastermind
 from engines.autopilot_content_engine import generate_autopilot_content
 from engines.orchestrator_engine import orchestrate
+from engines.trend_radar_engine import scan_trends
 
 app = FastAPI()
 
@@ -254,6 +255,12 @@ def generate(goal: str = Form(...)):
     prompt_data = understand_prompt(goal)
     mind = build_mastermind(goal, prompt_data)
     flow = orchestrate(goal, prompt_data)
+    trends = scan_trends(
+    goal,
+    result['niche'],
+    prompt_data['audience'],
+    prompt_data['platforms'][0] if prompt_data['platforms'] else "linkedin"
+)
     save_memory(result)
 
     content = generate_content(goal)
@@ -668,6 +675,31 @@ body::after {{
     <div class="post-text"><b>Next Actions:</b></div>
     <ul class="variation-list">
         {''.join(f"<li>{x}</li>" for x in flow['next_actions'][:3])}
+    </ul>
+</div>
+
+<!-- Trend Radar Card -->
+<div class="card">
+    <div class="section-label">Trend Radar</div>
+
+    <div class="post-text"><b>Best Topic Today:</b> {trends['best_topic_today']}</div>
+
+    <div class="divider"></div>
+
+    <div class="post-text"><b>Why Now:</b> {trends['why_now']}</div>
+
+    <div class="divider"></div>
+
+    <div class="post-text"><b>Hot Topics:</b></div>
+    <ul class="variation-list">
+        {''.join(f"<li>{x}</li>" for x in trends['hot_topics'][:3])}
+    </ul>
+
+    <div class="divider"></div>
+
+    <div class="post-text"><b>Content Opportunities:</b></div>
+    <ul class="variation-list">
+        {''.join(f"<li>{x}</li>" for x in trends['content_opportunities'][:3])}
     </ul>
 </div>
 
