@@ -20,6 +20,7 @@ from engines.visual_engine import generate_visual_assets
 from engines.competitor_engine import analyze_market
 from engines.publishing_engine import build_publish_queue
 from engines.mastermind_engine import build_mastermind
+from engines.autopilot_content_engine import generate_autopilot_content
 
 app = FastAPI()
 
@@ -254,6 +255,13 @@ def generate(goal: str = Form(...)):
     save_memory(result)
 
     content = generate_content(goal)
+    auto_content = generate_autopilot_content(
+    goal,
+    prompt_data['platforms'][0] if prompt_data['platforms'] else "linkedin",
+    result['niche'],
+    prompt_data['audience'],
+    []
+)
     plan = decide_post_plan(goal)
     growth = decide_growth_strategy(goal, "linkedin", {"engagement": "high", "last_posts": 5})
     brain = analyze_and_decide("linkedin", {
@@ -746,39 +754,35 @@ body::after {{
     <div class="post-text">{plan['reasoning']}</div>
 </div>
  
-    <!-- Content Card -->
-   <div class="card">
-    <div class="section-label">Content</div>
-
-    <div class="platform-tag tag-linkedin">LinkedIn</div>
-    <div class="post-text">{content['linkedin']}</div>
-
-    <div class="divider"></div>
-
-    <div class="platform-tag tag-instagram">Instagram</div>
-    <div class="post-text">{content['instagram']}</div>
-
-    <div class="divider"></div>
-
-    <div class="platform-tag tag-twitter">Twitter</div>
-    <div class="post-text">{content['twitter']}</div>
-</div>
-
+<!-- Autopilot Content Card -->
 <div class="card">
-    <div class="section-label">Platform Adapted</div>
+    <div class="section-label">Autopilot Content Engine</div>
 
-    <div class="platform-tag tag-linkedin">LinkedIn</div>
-    <div class="post-text">{adapted['linkedin']}</div>
-
-    <div class="divider"></div>
-
-    <div class="platform-tag tag-instagram">Instagram</div>
-    <div class="post-text">{adapted['instagram']}</div>
+    <div class="post-text"><b>Angle:</b> {auto_content['angle']}</div>
 
     <div class="divider"></div>
 
-    <div class="platform-tag tag-twitter">Twitter</div>
-    <div class="post-text">{adapted['twitter']}</div>
+    <div class="post-text"><b>Hook:</b><br>{auto_content['hook']}</div>
+
+    <div class="divider"></div>
+
+    <div class="post-text"><b>Ready Post:</b><br>{auto_content['post']}</div>
+
+    <div class="divider"></div>
+
+    <div class="post-text"><b>CTA:</b> {auto_content['cta']}</div>
+
+    <div class="divider"></div>
+
+    <div class="post-text"><b>Image Idea:</b> {auto_content['image_idea']}</div>
+
+    <div class="divider"></div>
+
+    <div class="post-text"><b>Why It Works:</b> {auto_content['why_this_will_work']}</div>
+
+    <div class="divider"></div>
+
+    <div class="post-text"><b>Freshness Score:</b> {auto_content['avoid_repeat_score']}/100</div>
 </div>
  
     <!-- Variations Card -->
