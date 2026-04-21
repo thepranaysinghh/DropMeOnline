@@ -209,9 +209,6 @@ def home():
 </head>
 <body>
  
-<div class="card">
-    <div class="section-label">Strategy</div>
-
 
     <div class="card">
 
