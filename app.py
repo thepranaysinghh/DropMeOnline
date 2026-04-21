@@ -291,7 +291,12 @@ def generate(goal: str = Form(...)):
     2
 )
     conversion = generate_conversion_assets(goal)
-    visuals = generate_visual_assets(goal, content['linkedin'])
+    visuals = generate_visual_assets(
+    goal,
+    auto_content,
+    mind,
+    prompt_data['platforms'][0] if prompt_data['platforms'] else "linkedin"
+)
     market = analyze_market(goal)
     publish = build_publish_queue(
     campaign,
