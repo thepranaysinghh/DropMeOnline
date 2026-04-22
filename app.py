@@ -1019,37 +1019,38 @@ body::after {{
 <div class="card">
     <div class="section-label">Visual Production Engine</div>
 
-    <div class="post-text"><b>LinkedIn Carousel:</b> {visuals['linkedin_carousel']['headline']}</div>
-    <ul class="variation-list">
-        {''.join(f"<li>{x}</li>" for x in visuals['linkedin_carousel']['slides'][:5])}
-    </ul>
+    <div class="post-text">
+        <b>Headline:</b><br>
+        {visuals['headline']}
+    </div>
 
     <div class="divider"></div>
 
-    <div class="post-text"><b>Instagram Creative:</b> {visuals['instagram_post']['headline']}</div>
-    <div class="post-text">{visuals['instagram_post']['caption_text']}</div>
+    <div class="post-text">
+        <b>Format:</b><br>
+        {visuals['format']}
+    </div>
 
     <div class="divider"></div>
 
-    <div class="post-text"><b>Twitter Graphic:</b> {visuals['twitter_graphic']['headline']}</div>
+    <div class="post-text">
+        <b>Image Prompt:</b><br>
+        {visuals['image_prompt']}
+    </div>
 
     <div class="divider"></div>
 
-    <div class="post-text"><b>Image Prompts:</b></div>
-    <ul class="variation-list">
-        <li>LinkedIn: {visuals['image_prompts']['linkedin']}</li>
-        <li>Instagram: {visuals['image_prompts']['instagram']}</li>
-        <li>Twitter: {visuals['image_prompts']['twitter']}</li>
-    </ul>
+    <div class="post-text">
+        <b>Style Notes:</b><br>
+        {visuals['style_notes']}
+    </div>
 
     <div class="divider"></div>
 
-    <div class="post-text"><b>Creative Style:</b></div>
-    <ul class="variation-list">
-        <li>LinkedIn: {visuals['styles']['linkedin']}</li>
-        <li>Instagram: {visuals['styles']['instagram']}</li>
-        <li>Twitter: {visuals['styles']['twitter']}</li>
-    </ul>
+    <div class="post-text">
+        <b>Why It Works:</b><br>
+        {visuals['why_it_works']}
+    </div>
 </div>
 
 <!-- Competitor Intelligence Card -->
