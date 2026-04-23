@@ -372,17 +372,43 @@ def _build_hook(goal, audience, niche, platform, mood, trigger, history, top_hoo
 # ══════════════════════════════════════════════════════════════════════════════
 
 def _build_post(hook, goal, audience, platform, mood, niche, trigger, tone) -> str:
-    if platform == "linkedin":
-        return _linkedin_post(hook, goal, audience, mood, trigger, tone)
-    elif platform == "instagram":
-        return _instagram_post(hook, goal, audience, mood)
-    elif platform == "twitter":
-        return _twitter_post(hook, goal, mood)
+    g = goal.lower()
+    if any(w in g for w in ["short", "quick", "brief", "one line", "1 line"]):
+        length = "short"
+    elif any(w in g for w in ["thread", "series", "multi"]):
+        length = "thread"
+    elif any(w in g for w in ["long", "detailed", "deep", "in depth", "full"]):
+        length = "long"
     else:
-        return _linkedin_post(hook, goal, audience, mood, trigger, tone)
+        length = "default"
+
+    if platform == "linkedin":
+        return _linkedin_post(hook, goal, audience, mood, trigger, tone, length)
+    elif platform == "instagram":
+        return _instagram_post(hook, goal, audience, mood, length)
+    elif platform == "twitter":
+        return _twitter_post(hook, goal, mood, length)
+    else:
+        return _linkedin_post(hook, goal, audience, mood, trigger, tone, length)
 
 
-def _linkedin_post(hook, goal, audience, mood, trigger, tone) -> str:
+def _linkedin_post(hook, goal, audience, mood, trigger, tone, length="default") -> str:
+    # Short mode — clean 3-line insight
+    if length == "short":
+        return f"{hook}\n\nMost people won't act on this.\n\nYou should."
+    # Thread mode
+    if length == "thread":
+        return (
+            f"{hook}\n\n"
+            f"Here's the full breakdown — save this 🧵\n\n"
+            f"1/ Most people start with the wrong question. They ask 'how' before they know 'why'.\n\n"
+            f"2/ Once you nail the why, the how becomes obvious. The path clears.\n\n"
+            f"3/ The people winning at {goal} aren't smarter. They asked better questions earlier.\n\n"
+            f"4/ Framework: Clarity → Strategy → Execution → Optimise. In that order. Always.\n\n"
+            f"5/ Where most fail: skipping directly to execution without the first two.\n\n"
+            f"Final: {goal} isn't complicated. But it requires the discipline to do things in order.\n\n"
+            f"Follow for more breakdowns like this."
+        )
     # Tone-aware opener modifier
     tone_opener = ""
     if "vulnerability" in tone:
@@ -460,7 +486,9 @@ def _linkedin_post(hook, goal, audience, mood, trigger, tone) -> str:
     return bodies.get(mood, default)
 
 
-def _instagram_post(hook, goal, audience, mood) -> str:
+def _instagram_post(hook, goal, audience, mood, length="default") -> str:
+    if length == "short":
+        return f"{hook} 🔥\n\n#growthmindset #realtalk"
     captions = {
         "funny":         f"{hook}\n\nSave this. You'll need it when it hits different at 2am.\n\n#reallife #careerlife #ai #relatable",
         "emotional":     f"{hook}\n\nYou're closer than it feels. Promise.\n\n#motivation #growth #career #forreal",
@@ -474,7 +502,19 @@ def _instagram_post(hook, goal, audience, mood) -> str:
     return captions.get(mood, default)
 
 
-def _twitter_post(hook, goal, mood) -> str:
+def _twitter_post(hook, goal, mood, length="default") -> str:
+    if length == "short":
+        return hook.split(".")[0] + "."
+    if length == "thread":
+        return (
+            f"{hook}\n\n"
+            f"Thread on exactly how 🧵\n\n"
+            f"1/ The foundation most people skip\n"
+            f"2/ The one metric that actually matters\n"
+            f"3/ Why consistency beats intensity\n"
+            f"4/ The mindset shift that changes everything\n\n"
+            f"Let's go."
+        )
     posts = {
         "controversial":  f"{hook}\n\nChange my mind.",
         "funny":         f"{hook}\n\n(I will not elaborate further.)",
