@@ -1,339 +1,242 @@
 # content_generator.py — Smart platform-specific content generator
-# Detects intent, length preference, style from user goal
-# Produces human-quality, platform-native posts every time
+# Uses intent_parser — never dumps raw prompt into post copy
 
+from engines.intent_parser import parse_intent
 from datetime import datetime
-import random
 
-# ── INTENT PARSER ─────────────────────────────────────────────────────────────
-
-def _parse_intent(goal: str) -> dict:
-    """
-    Reads the user's goal and extracts platform, length, tone, style hints.
-    Returns a dict that shapes how content is generated.
-    """
-    text = goal.lower()
-
-    # Length intent
-    if any(w in text for w in ["short", "quick", "brief", "one line", "1 line", "tiny"]):
-        length = "short"
-    elif any(w in text for w in ["long", "detailed", "deep", "in depth", "comprehensive", "full"]):
-        length = "long"
-    elif any(w in text for w in ["thread", "series", "multi"]):
-        length = "thread"
-    else:
-        length = "default"
-
-    # Tone intent
-    if any(w in text for w in ["funny", "humor", "meme", "sarcastic", "witty"]):
-        tone = "funny"
-    elif any(w in text for w in ["bold", "savage", "controversial", "hot take", "unpopular"]):
-        tone = "bold"
-    elif any(w in text for w in ["emotional", "story", "vulnerable", "personal", "honest"]):
-        tone = "emotional"
-    elif any(w in text for w in ["educational", "tips", "how to", "guide", "learn", "explain"]):
-        tone = "educational"
-    elif any(w in text for w in ["professional", "corporate", "formal", "authority"]):
-        tone = "professional"
-    elif any(w in text for w in ["motivational", "inspire", "energetic", "pumped"]):
-        tone = "inspirational"
-    else:
-        tone = "default"
-
-    # Platform hint from goal itself
-    platform_hints = []
-    if "linkedin" in text:
-        platform_hints.append("linkedin")
-    if "instagram" in text or "ig" in text or "reels" in text:
-        platform_hints.append("instagram")
-    if "twitter" in text or "tweet" in text or "x " in text:
-        platform_hints.append("twitter")
-
-    # Niche
-    niche = "general"
-    for kw, n in [
-        ("ai","ai"), ("resume","career"), ("job","career"), ("startup","startup"),
-        ("saas","saas"), ("fitness","fitness"), ("food","food"),
-        ("finance","finance"), ("fashion","fashion"), ("course","education"),
-        ("developer","tech"), ("coding","tech"), ("marketing","marketing")
-    ]:
-        if kw in text:
-            niche = n
-            break
-
-    return {
-        "length":          length,
-        "tone":            tone,
-        "platform_hints":  platform_hints,
-        "niche":           niche,
-    }
-
-
-# ── SEED FOR VARIETY ──────────────────────────────────────────────────────────
 
 def _seed() -> int:
     return int(datetime.now().microsecond) % 7
 
 
-# ── LINKEDIN GENERATOR ────────────────────────────────────────────────────────
+# ── LINKEDIN ─────────────────────────────────────────────────────────────────
 
-def _linkedin_post(goal: str, intent: dict) -> str:
+def _linkedin_post(intent: dict) -> str:
+    p   = intent["product"]        # e.g. "AI Resume Tool"
+    ref = intent["product_ref"]    # e.g. "the tool"
+    aud = intent["audience"]       # e.g. "job seekers"
     tone   = intent["tone"]
     length = intent["length"]
-    niche  = intent["niche"]
     s      = _seed()
 
-    # Short mode
     if length == "short":
         shorts = [
-            f"Most people overthink {goal}.\n\nHere's the thing — the ones who win just start.\n\nStop waiting. Start doing.",
-            f"The fastest way to grow with {goal}?\n\nShow up consistently when nobody's watching.\n\nThe algorithm rewards the relentless.",
-            f"{goal} isn't about being the smartest in the room.\n\nIt's about being the most useful.\n\nFocus on that.",
+            f"Most {aud} are doing this the hard way.\n\n{p} exists so they don't have to.\n\nStart where it's easier.",
+            f"The best thing about {p}?\n\nIt does the heavy lifting so {aud} can focus on what actually matters.\n\nThat's the whole idea.",
+            f"{p} isn't complicated.\n\nIt's just what happens when you stop building for yourself and start building for {aud}.",
         ]
         return shorts[s % len(shorts)]
 
-    # Thread mode
     if length == "thread":
         return (
-            f"I've been studying {goal} for months. Here's everything I learned:\n\n"
-            f"1/ Most people start wrong. They focus on tactics before they understand the foundation.\n\n"
-            f"2/ The foundation is always the same — know your audience better than they know themselves.\n\n"
-            f"3/ Once you have that, {goal} becomes a system. Not a guessing game.\n\n"
-            f"4/ The creators growing fastest aren't the most talented. They're the most consistent.\n\n"
-            f"5/ And they do one thing everyone else skips: they study what's NOT working as much as what is.\n\n"
-            f"6/ Final thought: {goal} is not a sprint. The people who win treat it like infrastructure.\n\n"
-            f"Save this. It'll make sense more the longer you're at it."
+            f"Everything I learned building {p} for {aud} — save this 🧵\n\n"
+            f"1/ Most people building in this space start with the wrong question. 'How do I make this?' instead of 'Why does this need to exist?'\n\n"
+            f"2/ {p} started from a simple frustration. {aud.capitalize()} had a real problem. Nobody was solving it well.\n\n"
+            f"3/ Once you nail the 'why', the what and how become obvious. The path clears.\n\n"
+            f"4/ The first version was ugly. We shipped it anyway. Real feedback beats perfect planning every time.\n\n"
+            f"5/ The lesson: the people winning aren't the most talented. They're the ones who started before they were ready.\n\n"
+            f"6/ {p} is what we built when we stopped waiting. It's built specifically for {aud}.\n\n"
+            f"Follow for more on building in public."
         )
 
-    # Tone variations — default length (8-10 lines)
     posts = {
         "funny": (
-            f"I used to think {goal} was complicated.\n\n"
-            f"Spoiler: I was just doing it wrong for 6 months straight.\n\n"
-            f"Here's what nobody tells you:\n\n"
-            f"→ Everyone looks like they have it figured out. They don't.\n"
-            f"→ The messy middle is where all the actual learning happens.\n"
-            f"→ The people you admire? They failed louder than you. They just kept going.\n\n"
-            f"Stop watching. Start building. Embarrass yourself publicly.\n\n"
-            f"That's the whole secret.\n\n"
-            f"(You're welcome.)"
+            f"We built {p} because we were tired of watching {aud} overcomplicate something that should be simple.\n\n"
+            f"The process before {ref}:\n"
+            f"→ Hours of manual work\n"
+            f"→ Generic advice that doesn't fit\n"
+            f"→ Pretending it's all under control\n\n"
+            f"The process with {ref}:\n"
+            f"→ Actually just works\n\n"
+            f"(We're not going to apologise for making it this easy.)"
         ),
         "bold": (
-            f"Unpopular opinion about {goal}:\n\n"
-            f"90% of the advice you've read is optimised for engagement — not results.\n\n"
-            f"Here's what actually works:\n\n"
-            f"→ Specificity beats volume every time\n"
-            f"→ One strong post outperforms ten average ones\n"
-            f"→ Your audience doesn't want more content — they want the right content\n\n"
-            f"The people winning at {goal} right now aren't posting more.\n\n"
-            f"They're thinking harder before they post.\n\n"
-            f"That's the edge most people skip."
+            f"Unpopular opinion: most tools built for {aud} are designed by people who've never been {aud}.\n\n"
+            f"That's why they fail.\n\n"
+            f"We built {p} differently:\n\n"
+            f"→ Starting from the real problem, not the obvious one\n"
+            f"→ Optimising for outcomes, not features\n"
+            f"→ Shipping fast and listening faster\n\n"
+            f"The result: something {aud} actually use.\n\n"
+            f"That's the only metric that matters."
         ),
         "emotional": (
-            f"6 months into {goal}, I almost gave up.\n\n"
-            f"Not because it was hard. Because I couldn't see the progress.\n\n"
-            f"Then someone told me: growth doesn't look like growth when you're in it.\n\n"
-            f"It looks like confusion. Like starting over. Like questioning everything.\n\n"
-            f"But one day you look back and realise —\n\n"
-            f"You're not the same person who started.\n\n"
-            f"That's the whole point of {goal}.\n\n"
-            f"If you're in the hard part right now: keep going."
+            f"The reason we built {p}:\n\n"
+            f"We watched talented {aud} get stuck. Not because they weren't capable.\n\n"
+            f"Because the tools available weren't built for them.\n\n"
+            f"They were built for someone else's version of the problem.\n\n"
+            f"We got tired of that.\n\n"
+            f"So we built {ref}. For {aud}. From the beginning.\n\n"
+            f"If that's you — this is for you."
         ),
         "educational": (
-            f"Most people approach {goal} wrong. Here's why:\n\n"
-            f"They start with tactics. They should start with positioning.\n\n"
-            f"The 3-part framework that actually works:\n\n"
-            f"1. Who is this for? (Specific beats general, always)\n"
-            f"2. What do they already believe? (Meet them there, not where you want them)\n"
-            f"3. What's the one thing that changes their mind? (Lead with that)\n\n"
-            f"Once you have those three locked in, {goal} becomes execution — not guesswork.\n\n"
-            f"The strategy is simple. The discipline to follow it is where most people fall off."
+            f"3 things most {aud} don't realise until it's too late:\n\n"
+            f"1. The biggest bottleneck isn't effort — it's the right system\n"
+            f"2. Manual processes don't scale, and they don't need to\n"
+            f"3. The right tool removes friction before you even notice it\n\n"
+            f"This is what we built {p} to do.\n\n"
+            f"Not another layer of complexity.\n"
+            f"A simpler path to the outcome {aud} actually want."
         ),
         "professional": (
-            f"After working on {goal} across multiple contexts, one pattern emerges clearly:\n\n"
-            f"The organisations — and individuals — that sustain growth treat it as a system, not a campaign.\n\n"
-            f"What separates them:\n\n"
-            f"→ Consistent positioning over time\n"
-            f"→ Audience intelligence before content creation\n"
-            f"→ Measurement tied to outcomes, not vanity metrics\n\n"
-            f"The fundamentals haven't changed. What's changed is how unforgiving the environment is when you ignore them.\n\n"
-            f"Execution advantage compounds. So does the gap between those who have it and those who don't."
+            f"Building something that genuinely works for {aud} requires understanding two things:\n\n"
+            f"What they say they need. And what they actually need.\n\n"
+            f"Those are almost never the same thing.\n\n"
+            f"{p} was built after listening to the second category.\n\n"
+            f"The result is a product that fits into how {aud} actually work — not how we imagined they might."
         ),
         "inspirational": (
-            f"A year from now, you'll wish you had started {goal} today.\n\n"
-            f"Not because it's easy.\n\n"
-            f"Because the version of you that's consistent for 12 months is unrecognisable from the version that's still thinking about starting.\n\n"
-            f"The secret the top 1% know:\n\n"
-            f"→ They didn't have a perfect plan\n"
-            f"→ They had a working one\n"
-            f"→ And they showed up when the motivation wasn't there\n\n"
-            f"That's the whole game.\n\n"
-            f"Start before you're ready. You'll never be more ready than right now."
+            f"A year from now, the {aud} who figured out how to work smarter will be unrecognisable.\n\n"
+            f"Not because they're smarter.\n\n"
+            f"Because they stopped doing manually what could be done better.\n\n"
+            f"That's what {p} is built around.\n\n"
+            f"The compounding starts the day you stop doing it the hard way."
         ),
     }
 
     default = (
-        f"Here's what changes everything about {goal}:\n\n"
-        f"Most people are optimising for the wrong thing.\n\n"
-        f"They want reach. They should want resonance.\n\n"
-        f"Because reach without resonance is just noise.\n\n"
-        f"The accounts growing fastest right now have one thing in common:\n\n"
-        f"→ They know exactly who they're talking to\n"
-        f"→ They say things that person needed to hear\n"
-        f"→ They show up before anyone's watching\n\n"
-        f"That's it. That's the whole playbook.\n\n"
-        f"Now go build."
+        f"We built {p} for one simple reason:\n\n"
+        f"{aud.capitalize()} deserve a tool that actually understands their problem.\n\n"
+        f"Not a generic solution.\n"
+        f"Not another feature nobody asked for.\n\n"
+        f"Just the thing that moves the needle — simply, quickly, reliably.\n\n"
+        f"That's {ref}."
     )
-
     return posts.get(tone, default)
 
 
-# ── INSTAGRAM GENERATOR ───────────────────────────────────────────────────────
+# ── INSTAGRAM ────────────────────────────────────────────────────────────────
 
-def _instagram_post(goal: str, intent: dict) -> str:
+def _instagram_post(intent: dict) -> str:
+    p   = intent["product"]
+    ref = intent["product_ref"]
+    aud = intent["audience"]
     tone   = intent["tone"]
     length = intent["length"]
     s      = _seed()
+    niche  = intent["niche"]
 
     if length == "short":
-        shorts = [
-            f"This changed how I think about {goal} 👇\n\n#growth #mindset",
-            f"Nobody talks about this side of {goal} 👀\n\n#realtalk #growthmindset",
-            f"Start with {goal}. Figure the rest out as you go. 🚀\n\n#startbefore #momentum",
-        ]
-        return shorts[s % len(shorts)]
+        return f"Built for {aud}. Tested by {aud}. That's {p}. 🔥\n\n#buildinpublic #growth"
 
     posts = {
         "funny": (
-            f"POV: You've been avoiding {goal} for 3 months 💀\n\n"
-            f"Also you: 'I'll start Monday'\n\n"
-            f"Monday: exists\n\n"
-            f"You: 🦗\n\n"
-            f"Okay but real talk — the hardest part isn't starting. It's starting badly and continuing anyway.\n\n"
-            f"Drop a 🙋 if you've been here.\n\n"
-            f"#relatable #growthmindset #realtalk #startanyway"
+            f"POV: You're {aud} and you just found {p} 👀\n\n"
+            f"Before: doing everything manually and pretending it's fine 💀\n"
+            f"After: actually having a system that works 😤\n\n"
+            f"Drop a 🙋 if this is your arc.\n\n"
+            f"#relatable #growthmindset #buildinpublic"
         ),
         "bold": (
-            f"Hot take: most people will never figure out {goal} 🔥\n\n"
-            f"Not because they're not smart enough.\n\n"
-            f"Because they're waiting to be ready.\n\n"
-            f"Readiness is a myth.\n\n"
-            f"The people winning started uncomfortable and got comfortable through action.\n\n"
-            f"Save this for when you're overthinking. 📌\n\n"
-            f"#truth #boldmoves #startbefore #noexcuses"
+            f"Hot take: most {aud} are using the wrong tools for the job. 🔥\n\n"
+            f"Not their fault — the right ones are hard to find.\n\n"
+            f"{p} was built to fix that.\n\n"
+            f"Save this if you're finally ready to try the right one. 📌"
         ),
         "emotional": (
-            f"To everyone working on {goal} quietly —\n\n"
-            f"The progress you can't see yet is still progress. 🌱\n\n"
-            f"Keep going.\n\n"
-            f"The version of you that didn't give up is going to be proud.\n\n"
-            f"❤️ Save this when you need it.\n\n"
-            f"#youvegotthis #growthmindset #keepgoing #motivation"
+            f"To every {aud.split()[0]} who's been figuring this out alone —\n\n"
+            f"We built {p} for you. 🌱\n\n"
+            f"You don't have to do it the hard way anymore.\n\n"
+            f"❤️ Save this when you need the reminder."
         ),
         "educational": (
-            f"3 things nobody tells you about {goal} 👇\n\n"
-            f"1. The beginning is the hardest — and the most important\n"
-            f"2. The results come in waves, not straight lines\n"
-            f"3. Consistency over a month beats intensity over a week\n\n"
-            f"Save this and come back to it when you're doubting yourself. 📌\n\n"
-            f"#tips #learn #growthhacks #mindset"
+            f"3 things {aud} get wrong — and how {p} fixes them 👇\n\n"
+            f"1. Starting with tactics before strategy\n"
+            f"2. Manual work that should be automated\n"
+            f"3. Skipping the step that compounds everything\n\n"
+            f"Save this. Come back to it. 📌"
         ),
         "inspirational": (
-            f"You're closer than you think with {goal}. ✨\n\n"
-            f"The compounding is invisible until suddenly — it isn't.\n\n"
-            f"Show up today like the version of you that figured it out already.\n\n"
-            f"That energy is everything.\n\n"
-            f"🚀 Double tap if you needed this.\n\n"
-            f"#motivation #growthmindset #inspiration #believe"
+            f"The version of you that figured out {ref}? 🚀\n\n"
+            f"That version exists.\n\n"
+            f"Built for {aud} who are done waiting.\n\n"
+            f"Double tap if you're ready. ✨"
         ),
     }
 
-    default = (
-        f"The thing about {goal} that changed everything for me 👇\n\n"
-        f"It's not about being the best.\n\n"
-        f"It's about being consistent when it's uncomfortable.\n\n"
-        f"That's the actual edge. 🔥\n\n"
-        f"Save this if you needed the reminder. 📌\n\n"
-        f"#growth #mindset #realtalk #motivation #growthmindset"
-    )
+    hashtag_sets = {
+        "career":    "#career #personalbrand #linkedin #jobsearch #growthmindset",
+        "ai":        "#ai #aitools #futureofwork #buildinpublic #techstartup",
+        "startup":   "#startup #founder #buildinpublic #entrepreneurship #indiehacker",
+        "fitness":   "#fitness #healthylifestyle #workout #mindset #motivation",
+        "finance":   "#personalfinance #investing #moneymindset #financialfreedom",
+        "education": "#learning #selfimprovement #skills #growthmindset #education",
+        "saas":      "#saas #productdesign #buildinpublic #startup #tech",
+        "general":   "#growth #mindset #motivation #growthmindset #buildinpublic",
+    }
 
-    return posts.get(tone, default)
+    base = posts.get(tone, f"{p} — built specifically for {aud}. ✨\n\nThis is what it looks like when tools actually understand the problem.\n\nSave this if you're tired of the hard way. 📌")
+    tags = hashtag_sets.get(niche, hashtag_sets["general"])
+
+    if "#" not in base:
+        base = base.rstrip() + f"\n\n{tags}"
+    return base
 
 
-# ── TWITTER GENERATOR ─────────────────────────────────────────────────────────
+# ── TWITTER ──────────────────────────────────────────────────────────────────
 
-def _twitter_post(goal: str, intent: dict) -> str:
-    tone   = intent["tone"]
+def _twitter_post(intent: dict) -> str:
+    p    = intent["product"]
+    ref  = intent["product_ref"]
+    aud  = intent["audience"]
+    tone = intent["tone"]
     length = intent["length"]
-    s      = _seed()
+    s    = _seed()
+
+    if length == "short":
+        shorts = [
+            f"Built {p} for {aud}. Shipped it before it was perfect. Zero regrets.",
+            f"{aud.capitalize()} deserve better tools. That's why {p} exists.",
+            f"The hard way was never the right way. {p} for {aud}.",
+        ]
+        return shorts[s % len(shorts)]
 
     if length == "thread":
         return (
-            f"Everything I know about {goal} in one thread. Bookmark this 🧵\n\n"
-            f"1/ Most people start with tactics. Wrong move. Start with clarity.\n\n"
-            f"2/ Clarity = who you're for + what you uniquely offer + why now.\n\n"
-            f"3/ Once that's locked: {goal} becomes execution, not strategy.\n\n"
-            f"4/ Execution principle: do less, better. One strong move beats five weak ones.\n\n"
-            f"5/ Measurement: track leading indicators, not lagging ones.\n\n"
-            f"6/ The uncomfortable truth: 90% of people fail at {goal} because of inconsistency, not capability.\n\n"
-            f"7/ Fix: build systems that work when motivation doesn't.\n\n"
-            f"Final thought: {goal} is not a sprint. It's infrastructure. Build accordingly.\n\n"
-            f"RT if this hit."
+            f"Why we built {p} for {aud} — and what we learned shipping it 🧵\n\n"
+            f"1/ The problem: {aud} had no tool built specifically for them. Generic ones kept failing.\n\n"
+            f"2/ Most tools are built by people who heard about the problem secondhand. We lived it.\n\n"
+            f"3/ First principle: if you have to explain why someone should use it, you haven't solved it yet.\n\n"
+            f"4/ We shipped ugly. Got feedback. Shipped again. The cycle is the product.\n\n"
+            f"5/ Lesson: distribution matters as much as the product. Maybe more.\n\n"
+            f"6/ {p} is live. Built for {aud}. Free to start.\n\n"
+            f"RT if this thread helped."
         )
 
-    if length == "short":
-        shorts = [
-            f"{goal} > excuses.",
-            f"Still not starting {goal}? Cool. Your competition is.",
-            f"The best time to start {goal} was last year. Second best: now.",
-        ]
-        return shorts[s % len(shorts)]
-
     posts = {
-        "funny": (
-            f"Things that are easier than starting {goal}:\n\n"
-            f"- Scrolling for 3 hours\n"
-            f"- Reorganising your desktop\n"
-            f"- Watching a 47-part series about productivity\n\n"
-            f"Things that actually work: starting {goal} badly and improving."
-        ),
         "bold": (
-            f"Controversial opinion:\n\n"
-            f"Most {goal} advice is written by people who haven't done it recently.\n\n"
-            f"The market has changed. The tactics have changed.\n\n"
-            f"Stop following blueprints. Start running experiments."
+            f"Controversial: most tools for {aud} are built by people who've never been {aud}.\n\n"
+            f"That's why they're mediocre.\n\n"
+            f"We built {p} from the inside. There's a difference."
+        ),
+        "funny": (
+            f"{aud.capitalize()} after finding {p}:\n\n"
+            f"'Why didn't this exist before'\n\n"
+            f"(it kind of did, we just made it actually work)"
         ),
         "educational": (
-            f"The {goal} framework nobody teaches:\n\n"
-            f"→ Clarity before content\n"
-            f"→ Audience before algorithm\n"
-            f"→ Consistency before perfection\n\n"
-            f"In that order. Every time.\n\n"
-            f"Thread on why 🧵"
+            f"What nobody tells {aud}:\n\n"
+            f"→ The bottleneck isn't effort\n"
+            f"→ It's having the right system\n"
+            f"→ {p} is that system\n\n"
+            f"Thread on how 🧵"
         ),
         "emotional": (
-            f"Nobody talks about the quiet phase of {goal}.\n\n"
-            f"Where you're doing the work.\n"
-            f"Getting zero feedback.\n"
-            f"Wondering if it's working.\n\n"
-            f"It is.\n\n"
-            f"Keep going."
+            f"We built {p} because we watched great {aud} struggle with tools not built for them.\n\n"
+            f"That felt wrong.\n\n"
+            f"So we fixed it."
         ),
         "inspirational": (
-            f"The version of you that committed to {goal} 6 months ago would be unrecognisable.\n\n"
-            f"That version still exists.\n\n"
-            f"Start today."
+            f"The {aud} who figure out {ref} early will look back and wonder why they waited.\n\n"
+            f"Don't be that person."
         ),
     }
 
     default = (
-        f"Hot take: {goal} isn't the hard part.\n\n"
-        f"Starting is.\n"
-        f"Continuing when it's quiet is.\n"
-        f"Trusting the process when you can't see the results is.\n\n"
-        f"The doing is actually the easy part."
+        f"Built {p} for {aud}.\n\n"
+        f"Simple problem. Took too long to solve properly.\n\n"
+        f"We solved it."
     )
-
     return posts.get(tone, default)
 
 
@@ -341,14 +244,15 @@ def _twitter_post(goal: str, intent: dict) -> str:
 
 def generate_content(goal: str) -> dict:
     """
-    Input:  goal (string) — user's natural language prompt
-    Output: dict with platform-specific smart content
+    Input:  raw user goal string
+    Output: platform-specific content dict
+    Never dumps raw goal into post copy.
     """
-    intent = _parse_intent(goal)
+    intent = parse_intent(goal)
 
     return {
-        "linkedin":  _linkedin_post(goal, intent),
-        "instagram": _instagram_post(goal, intent),
-        "twitter":   _twitter_post(goal, intent),
-        "_intent":   intent,  # Pass intent downstream if needed
+        "linkedin":  _linkedin_post(intent),
+        "instagram": _instagram_post(intent),
+        "twitter":   _twitter_post(intent),
+        "_intent":   intent,
     }

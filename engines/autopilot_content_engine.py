@@ -1,3 +1,4 @@
+from engines.intent_parser import parse_intent
 # autopilot_content_engine.py — Autonomous Content Intelligence Engine
 # Now powered by mastermind_engine intelligence (mind input)
 # Feels like a genius human operator — not a template machine
@@ -32,6 +33,12 @@ def generate_autopilot_content(
     mind     = mind or {}
     platform = platform.lower().strip()
     text     = f"{goal} {niche} {audience}".lower()
+
+    # Parse clean intent
+    intent   = parse_intent(goal)
+    _product = intent["product"]
+    _ref     = intent["product_ref"]
+    _aud_c   = intent["audience"]
 
     # --- Pull from mastermind if available, else self-derive ---
     trigger   = mind.get("psychology_trigger") or _pick_trigger(audience, text)
@@ -393,6 +400,10 @@ def _build_post(hook, goal, audience, platform, mood, niche, trigger, tone) -> s
 
 
 def _linkedin_post(hook, goal, audience, mood, trigger, tone, length="default") -> str:
+    _i   = parse_intent(goal)
+    _p   = _i["product"]
+    _ref = _i["product_ref"]
+    _aud = audience or _i["audience"]
     # Short mode — clean 3-line insight
     if length == "short":
         return f"{hook}\n\nMost people won't act on this.\n\nYou should."
@@ -403,10 +414,10 @@ def _linkedin_post(hook, goal, audience, mood, trigger, tone, length="default") 
             f"Here's the full breakdown — save this 🧵\n\n"
             f"1/ Most people start with the wrong question. They ask 'how' before they know 'why'.\n\n"
             f"2/ Once you nail the why, the how becomes obvious. The path clears.\n\n"
-            f"3/ The people winning at {goal} aren't smarter. They asked better questions earlier.\n\n"
+            f"3/ The {_aud} winning fastest aren't smarter. They asked better questions earlier.\n\n"
             f"4/ Framework: Clarity → Strategy → Execution → Optimise. In that order. Always.\n\n"
             f"5/ Where most fail: skipping directly to execution without the first two.\n\n"
-            f"Final: {goal} isn't complicated. But it requires the discipline to do things in order.\n\n"
+            f"Final: {_p} isn't complicated. But it requires the discipline to do things in order.\n\n"
             f"Follow for more breakdowns like this."
         )
     # Tone-aware opener modifier
@@ -424,7 +435,7 @@ def _linkedin_post(hook, goal, audience, mood, trigger, tone, length="default") 
             f"Here's the thing nobody tells {audience}:\n\n"
             f"The system isn't designed for you to figure it out alone.\n"
             f"That's not a motivational line. It's just true.\n\n"
-            f"{goal} exists because capable people shouldn't stay invisible.\n\n"
+            f"{_p} exists because {_aud} shouldn't stay invisible.\n\n"
             f"You don't need to work harder.\n"
             f"You need to work on the right thing."
         ),
@@ -439,7 +450,7 @@ def _linkedin_post(hook, goal, audience, mood, trigger, tone, length="default") 
         ),
         "educational": (
             f"{tone_opener}{hook}\n\n"
-            f"Most {audience} skip this entirely.\n\n"
+            f"Most {_aud} skip this entirely.\n\n"
             f"Here's what actually matters:\n\n"
             f"→ First impressions form in under 7 seconds\n"
             f"→ Most profiles are optimised for the wrong reader\n"
@@ -450,7 +461,7 @@ def _linkedin_post(hook, goal, audience, mood, trigger, tone, length="default") 
         "controversial": (
             f"{tone_opener}{hook}\n\n"
             f"I'll defend this.\n\n"
-            f"Every {audience} gets told:\n"
+            f"Every {_aud} gets told:\n"
             f"→ Tailor your resume\n"
             f"→ Network more\n"
             f"→ Apply consistently\n\n"
@@ -465,7 +476,7 @@ def _linkedin_post(hook, goal, audience, mood, trigger, tone, length="default") 
             f"It wasn't even experience.\n\n"
             f"It was how they showed up before the interview existed.\n\n"
             f"Digital presence. Strategic visibility. Consistent signal.\n\n"
-            f"{goal} makes that the default — not the exception."
+            f"{_p} makes that the default — not the exception."
         ),
         "curiosity": (
             f"{tone_opener}{hook}\n\n"
@@ -473,15 +484,14 @@ def _linkedin_post(hook, goal, audience, mood, trigger, tone, length="default") 
             f"Not because it's hidden.\n"
             f"Because everyone's too busy doing the obvious thing.\n\n"
             f"The pattern only shows up when you look at outcomes, not effort.\n\n"
-            f"{goal} is built around that pattern."
+            f"{_p} is built around that pattern."
         ),
     }
     default = (
         f"{tone_opener}{hook}\n\n"
-        f"The {audience} who grow fastest aren't working harder.\n\n"
+        f"The {_aud} who grow fastest aren't working harder.\n\n"
         f"They found leverage.\n\n"
-        f"{goal} is that leverage.\n"
-        f"Built for people who are done doing this the hard way."
+        f"{_p} is that leverage — built for {_aud} who are done doing this the hard way."
     )
     return bodies.get(mood, default)
 

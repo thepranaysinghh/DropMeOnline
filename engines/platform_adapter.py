@@ -1,3 +1,4 @@
+from engines.intent_parser import parse_intent
 # platform_adapter.py — Smart platform adapter
 # Reads intent from content_generator output and applies platform-native polish
 # Does NOT repeat the post — adds finishing layer only
@@ -11,6 +12,10 @@ def adapt_platform(content: dict) -> dict:
     intent  = content.get("_intent", {})
     tone    = intent.get("tone", "default")
     length  = intent.get("length", "default")
+
+    # Get clean product ref if available
+    _p   = intent.get("product", "")
+    _ref = intent.get("product_ref", "the tool")
 
     adapted = {}
 
