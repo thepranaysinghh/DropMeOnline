@@ -24,6 +24,7 @@ from engines.autopilot_content_engine import generate_autopilot_content
 from engines.orchestrator_engine import orchestrate
 from engines.trend_radar_engine import scan_trends
 from engines.analytics_engine import generate_dashboard_stats
+from engines.image_engine import generate_images
 
 app = FastAPI()
 
@@ -457,6 +458,7 @@ def generate(goal: str = Form(...)):
     distribution = create_distribution_plan(30, active_platforms, 2)
     conversion   = generate_conversion_assets(goal)
     visuals      = generate_visual_assets(goal, auto_content, mind, primary_platform)
+    images       = generate_images(goal, result["niche"], mind.get("tone",""), mind)
     market       = analyze_market(goal)
     publish      = build_publish_queue(campaign, active_platforms)
 
@@ -465,6 +467,15 @@ def generate(goal: str = Form(...)):
 
     def sraw(val):
         return str(val).replace("{","").replace("}","")
+
+    # Image SVGs
+    li_svg  = images["linkedin"]["svg"]
+    ig_svg  = images["instagram"]["svg"]
+    tw_svg  = images["twitter"]["svg"]
+    li_img_prompt = sraw(images["linkedin"]["prompt"])
+    ig_img_prompt = sraw(images["instagram"]["prompt"])
+    tw_img_prompt = sraw(images["twitter"]["prompt"])
+    img_style     = sraw(images["linkedin"]["style"])
 
     days_of_week = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
     cal_rows = ""
@@ -700,16 +711,62 @@ def generate(goal: str = Form(...)):
 <!-- RIGHT COLUMN -->
 <div class="right-col">
 
-<!-- VISUAL STUDIO -->
+<!-- VISUAL ASSETS -->
 <div class="glass" style="padding:24px;">
-    <div class="slabel">Visual Studio</div>
-    <div class="vgrid">
-        <div class="vstat"><div class="vlbl">Format</div><div class="vval" style="color:var(--text);">""" + safe(visuals.get("format","")) + """</div></div>
-        <div class="vstat"><div class="vlbl">Score</div><div class="vval" style="color:var(--green);">""" + str(auto_content.get("avoid_repeat_score","—")) + """/100</div></div>
-        <div class="vstat vfull"><div class="vlbl">Headline</div><div class="vval">""" + safe(visuals.get("headline","")) + """</div></div>
-        <div class="vstat vfull"><div class="vlbl">Image Prompt</div><div class="vval" style="font-size:11px;color:var(--dim);">""" + safe(visuals.get("image_prompt",""))[:170] + """</div></div>
-        <div class="vstat vfull"><div class="vlbl">Style Notes</div><div class="vval" style="font-size:11px;color:var(--dim);">""" + safe(visuals.get("style_notes",""))[:130] + """</div></div>
+    <div class="slabel">Visual Assets</div>
+    <style>
+    .img-card{position:relative;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);margin-bottom:14px;cursor:zoom-in;transition:transform .25s,box-shadow .25s;}
+    .img-card:hover{transform:scale(1.015);box-shadow:0 16px 48px rgba(0,0,0,0.6);}
+    .img-card svg{display:block;width:100%;height:auto;}
+    .img-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.75) 0%,transparent 50%);opacity:0;transition:opacity .25s;}
+    .img-card:hover .img-overlay{opacity:1;}
+    .img-actions{position:absolute;bottom:12px;left:12px;right:12px;display:flex;gap:8px;opacity:0;transition:opacity .25s;}
+    .img-card:hover .img-actions{opacity:1;}
+    .img-btn{flex:1;padding:7px 10px;font-size:11px;font-weight:600;font-family:var(--sans);border-radius:8px;border:none;cursor:pointer;transition:all .2s;text-align:center;}
+    .img-btn-dl{background:rgba(255,255,255,0.15);color:#fff;backdrop-filter:blur(8px);}
+    .img-btn-cp{background:rgba(139,92,246,0.3);color:#c4b5fd;backdrop-filter:blur(8px);}
+    .img-btn-dl:hover{background:rgba(255,255,255,0.25);}
+    .img-btn-cp:hover{background:rgba(139,92,246,0.5);}
+    .img-plat-tag{position:absolute;top:10px;left:10px;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:3px 10px;border-radius:20px;backdrop-filter:blur(8px);}
+    </style>
+
+    <!-- LinkedIn Image -->
+    <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:8px;">LinkedIn</div>
+    <div class="img-card" id="li-img-card">
+        """ + li_svg + """
+        <div class="img-overlay"></div>
+        <span class="img-plat-tag tag-li">LinkedIn Cover</span>
+        <div class="img-actions">
+            <button class="img-btn img-btn-dl" onclick="dlSvg('li-img-card','linkedin-cover.svg')">⬇ Download</button>
+            <button class="img-btn img-btn-cp" onclick="cpPrompt('""" + li_img_prompt[:200].replace("'","").replace('"','') + """')">Copy Prompt</button>
+        </div>
     </div>
+
+    <!-- Instagram Image -->
+    <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:8px;">Instagram</div>
+    <div class="img-card" id="ig-img-card">
+        """ + ig_svg + """
+        <div class="img-overlay"></div>
+        <span class="img-plat-tag tag-ig">Instagram Post</span>
+        <div class="img-actions">
+            <button class="img-btn img-btn-dl" onclick="dlSvg('ig-img-card','instagram-post.svg')">⬇ Download</button>
+            <button class="img-btn img-btn-cp" onclick="cpPrompt('""" + ig_img_prompt[:200].replace("'","").replace('"','') + """')">Copy Prompt</button>
+        </div>
+    </div>
+
+    <!-- Twitter Image -->
+    <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:8px;">Twitter / X</div>
+    <div class="img-card" id="tw-img-card">
+        """ + tw_svg + """
+        <div class="img-overlay"></div>
+        <span class="img-plat-tag tag-tw">Twitter Card</span>
+        <div class="img-actions">
+            <button class="img-btn img-btn-dl" onclick="dlSvg('tw-img-card','twitter-card.svg')">⬇ Download</button>
+            <button class="img-btn img-btn-cp" onclick="cpPrompt('""" + tw_img_prompt[:200].replace("'","").replace('"','') + """')">Copy Prompt</button>
+        </div>
+    </div>
+
+    <div style="font-size:11px;color:rgba(255,255,255,0.25);margin-top:4px;line-height:1.5;">Style: <span style="color:#a78bfa;">""" + img_style + """</span> · SVG — download and use directly, or copy prompt for AI generators (Firefly, Canva AI, Leonardo)</div>
 </div>
 
 <!-- 7 DAY CALENDAR -->
@@ -746,6 +803,22 @@ function cp(btn,text){
         const orig=btn.textContent;
         btn.textContent='Copied!';btn.style.color='var(--green)';
         setTimeout(()=>{btn.textContent=orig;btn.style.color='';},2000);
+    });
+}
+function dlSvg(cardId, filename){
+    const card = document.getElementById(cardId);
+    const svg  = card.querySelector('svg');
+    if(!svg) return;
+    const blob = new Blob([svg.outerHTML], {type:'image/svg+xml'});
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = filename;
+    a.click(); URL.revokeObjectURL(url);
+}
+function cpPrompt(text){
+    navigator.clipboard.writeText(text).then(()=>{
+        const btns = document.querySelectorAll('.img-btn-cp');
+        btns.forEach(b=>{ if(b.onclick && b.onclick.toString().includes(text.slice(0,20))){ b.textContent='Copied!'; setTimeout(()=>b.textContent='Copy Prompt',2000); } });
     });
 }
 </script>
