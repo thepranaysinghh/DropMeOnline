@@ -25,6 +25,7 @@ from engines.orchestrator_engine import orchestrate
 from engines.trend_radar_engine import scan_trends
 from engines.analytics_engine import generate_dashboard_stats
 from engines.image_engine import generate_images
+from engines.intent_parser import parse_intent
 
 app = FastAPI()
 
@@ -435,6 +436,7 @@ def generate(goal: str = Form(...)):
 
     result       = generate_strategy(goal)
     prompt_data  = understand_prompt(goal)
+    intent       = parse_intent(goal)          # clean structured intent
     mind         = build_mastermind(goal, prompt_data)
     flow         = orchestrate(goal, prompt_data)
 
@@ -468,14 +470,17 @@ def generate(goal: str = Form(...)):
     def sraw(val):
         return str(val).replace("{","").replace("}","")
 
-    # Image SVGs
-    li_svg  = images["linkedin"]["svg"]
-    ig_svg  = images["instagram"]["svg"]
-    tw_svg  = images["twitter"]["svg"]
+    # Image data from new image_engine (url + fallback_svg + prompt)
+    li_img_url    = images["linkedin"]["url"]
+    ig_img_url    = images["instagram"]["url"]
+    tw_img_url    = images["twitter"]["url"]
+    li_svg        = images["linkedin"]["fallback_svg"]
+    ig_svg        = images["instagram"]["fallback_svg"]
+    tw_svg        = images["twitter"]["fallback_svg"]
     li_img_prompt = sraw(images["linkedin"]["prompt"])
     ig_img_prompt = sraw(images["instagram"]["prompt"])
     tw_img_prompt = sraw(images["twitter"]["prompt"])
-    img_style     = sraw(images["linkedin"]["style"])
+    img_style     = sraw(images["linkedin"].get("palette", images["linkedin"].get("style", "tech")))
 
     days_of_week = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
     cal_rows = ""
@@ -538,6 +543,20 @@ def generate(goal: str = Form(...)):
 /* Pub row */
 .pub-row { display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px; }
 .pub-btn { display:block;text-align:center;padding:13px;font-size:12px;font-weight:600;font-family:var(--sans);border-radius:12px;text-decoration:none;cursor:pointer;transition:all .25s;border:none; }
+
+/* Publish action buttons (new inline style) */
+.pub-act-btn{font-size:12px;font-weight:600;font-family:var(--sans);
+             color:rgba(255,255,255,.55);background:rgba(255,255,255,.06);
+             border:1px solid rgba(255,255,255,.12);border-radius:9px;
+             padding:7px 14px;cursor:pointer;transition:all .2s;
+             text-decoration:none;white-space:nowrap;}
+.pub-act-btn:hover{color:#fff;background:rgba(255,255,255,.12);}
+.pub-act-primary{color:#93c5fd;background:rgba(37,99,235,.15);border-color:rgba(37,99,235,.3);}
+.pub-act-primary:hover{background:rgba(37,99,235,.28);}
+.pub-act-ig{color:#f9a8d4;background:rgba(236,72,153,.12);border-color:rgba(236,72,153,.28);}
+.pub-act-ig:hover{background:rgba(236,72,153,.25);}
+.pub-act-tw{color:#7dd3fc;background:rgba(14,165,233,.12);border-color:rgba(14,165,233,.28);}
+.pub-act-tw:hover{background:rgba(14,165,233,.25);}
 
 /* Strategy intel */
 .intel-note { margin-top:14px;padding:14px 16px;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;color:var(--muted);line-height:1.7; }
@@ -670,12 +689,52 @@ def generate(goal: str = Form(...)):
 </div>
 
 <!-- PUBLISH -->
-<div class="glass" style="padding:26px;">
-    <div class="slabel">Publish Now</div>
-    <div class="pub-row">
-        <a href='""" + li_url + """' target="_blank" class="pub-btn pub-li">→ LinkedIn</a>
-        <button class="pub-btn pub-ig" onclick="alert('Copy caption above, then open Instagram.')">→ Instagram</button>
-        <a href='""" + tw_url + """' target="_blank" class="pub-btn pub-tw">→ Twitter / X</a>
+<div class="glass" style="padding:24px;">
+    <div class="slabel">Publish</div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+
+        <!-- LinkedIn -->
+        <div style="background:rgba(37,99,235,.07);border:1px solid rgba(37,99,235,.2);border-radius:14px;padding:14px 16px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+                <div>
+                    <div style="font-size:11px;font-weight:700;color:#93c5fd;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">LinkedIn</div>
+                    <div style="font-size:12px;color:rgba(255,255,255,0.4);">""" + li_post_1[:55].replace('"','').replace("'","") + """…</div>
+                </div>
+                <div style="display:flex;gap:8px;flex-shrink:0;">
+                    <button class="pub-act-btn" onclick="cp(this,'""" + li_post_1.replace("'","").replace('"','')[:400] + """')">Copy</button>
+                    <a href='""" + li_url + """' target="_blank" class="pub-act-btn pub-act-primary">Post →</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instagram -->
+        <div style="background:rgba(236,72,153,.06);border:1px solid rgba(236,72,153,.18);border-radius:14px;padding:14px 16px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+                <div>
+                    <div style="font-size:11px;font-weight:700;color:#f9a8d4;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">Instagram</div>
+                    <div style="font-size:12px;color:rgba(255,255,255,0.4);">Copy caption → open app → paste</div>
+                </div>
+                <div style="display:flex;gap:8px;flex-shrink:0;">
+                    <button class="pub-act-btn" onclick="cp(this,'""" + ig_post_1.replace("'","").replace('"','')[:400] + """')">Copy</button>
+                    <a href="https://www.instagram.com/" target="_blank" class="pub-act-btn pub-act-ig">Open →</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Twitter -->
+        <div style="background:rgba(14,165,233,.06);border:1px solid rgba(14,165,233,.18);border-radius:14px;padding:14px 16px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+                <div>
+                    <div style="font-size:11px;font-weight:700;color:#7dd3fc;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">Twitter / X</div>
+                    <div style="font-size:12px;color:rgba(255,255,255,0.4);">""" + tw_tweet_1[:55].replace('"','').replace("'","") + """…</div>
+                </div>
+                <div style="display:flex;gap:8px;flex-shrink:0;">
+                    <button class="pub-act-btn" onclick="cp(this,'""" + tw_tweet_1.replace("'","").replace('"','')[:280] + """')">Copy</button>
+                    <a href='""" + tw_url + """' target="_blank" class="pub-act-btn pub-act-tw">Post →</a>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -711,62 +770,87 @@ def generate(goal: str = Form(...)):
 <!-- RIGHT COLUMN -->
 <div class="right-col">
 
-<!-- VISUAL ASSETS -->
+<!-- VISUAL ASSETS — real Unsplash photos with SVG fallback -->
 <div class="glass" style="padding:24px;">
-    <div class="slabel">Visual Assets</div>
+    <div class="slabel">Suggested Visuals</div>
     <style>
-    .img-card{position:relative;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);margin-bottom:14px;cursor:zoom-in;transition:transform .25s,box-shadow .25s;}
-    .img-card:hover{transform:scale(1.015);box-shadow:0 16px 48px rgba(0,0,0,0.6);}
-    .img-card svg{display:block;width:100%;height:auto;}
-    .img-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.75) 0%,transparent 50%);opacity:0;transition:opacity .25s;}
-    .img-card:hover .img-overlay{opacity:1;}
-    .img-actions{position:absolute;bottom:12px;left:12px;right:12px;display:flex;gap:8px;opacity:0;transition:opacity .25s;}
-    .img-card:hover .img-actions{opacity:1;}
-    .img-btn{flex:1;padding:7px 10px;font-size:11px;font-weight:600;font-family:var(--sans);border-radius:8px;border:none;cursor:pointer;transition:all .2s;text-align:center;}
-    .img-btn-dl{background:rgba(255,255,255,0.15);color:#fff;backdrop-filter:blur(8px);}
-    .img-btn-cp{background:rgba(139,92,246,0.3);color:#c4b5fd;backdrop-filter:blur(8px);}
-    .img-btn-dl:hover{background:rgba(255,255,255,0.25);}
-    .img-btn-cp:hover{background:rgba(139,92,246,0.5);}
-    .img-plat-tag{position:absolute;top:10px;left:10px;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:3px 10px;border-radius:20px;backdrop-filter:blur(8px);}
+    .vcard{position:relative;border-radius:14px;overflow:hidden;margin-bottom:14px;
+           background:rgba(0,0,0,0.3);aspect-ratio:16/9;cursor:pointer;
+           transition:transform .25s,box-shadow .3s;}
+    .vcard.square{aspect-ratio:1/1;}
+    .vcard:hover{transform:translateY(-3px);box-shadow:0 20px 50px rgba(0,0,0,0.6);}
+    .vcard img{width:100%;height:100%;object-fit:cover;display:block;
+               transition:transform .4s,opacity .3s;opacity:0;}
+    .vcard img.loaded{opacity:1;}
+    .vcard:hover img{transform:scale(1.04);}
+    .vcard-fallback{position:absolute;inset:0;z-index:1;transition:opacity .3s;}
+    .vcard img.loaded ~ .vcard-fallback{opacity:0;pointer-events:none;}
+    .vcard-bar{position:absolute;bottom:0;left:0;right:0;z-index:3;
+               padding:10px 12px;display:flex;align-items:center;justify-content:space-between;
+               background:linear-gradient(to top,rgba(0,0,0,0.8),transparent);
+               opacity:0;transition:opacity .25s;}
+    .vcard:hover .vcard-bar{opacity:1;}
+    .vtag{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:3px 10px;border-radius:20px;}
+    .vtag-li{background:rgba(37,99,235,.3);border:1px solid rgba(37,99,235,.5);color:#93c5fd;}
+    .vtag-ig{background:rgba(236,72,153,.25);border:1px solid rgba(236,72,153,.45);color:#f9a8d4;}
+    .vtag-tw{background:rgba(14,165,233,.25);border:1px solid rgba(14,165,233,.45);color:#7dd3fc;}
+    .vaction-btn{font-size:11px;font-weight:600;font-family:var(--sans);color:#fff;
+                 background:rgba(255,255,255,.15);backdrop-filter:blur(8px);
+                 border:1px solid rgba(255,255,255,.2);border-radius:8px;
+                 padding:5px 12px;cursor:pointer;transition:all .2s;text-decoration:none;}
+    .vaction-btn:hover{background:rgba(255,255,255,.28);}
+    .vprompt-btn{font-size:11px;font-weight:600;font-family:var(--sans);color:#c4b5fd;
+                 background:rgba(139,92,246,.25);backdrop-filter:blur(8px);
+                 border:1px solid rgba(139,92,246,.35);border-radius:8px;
+                 padding:5px 12px;cursor:pointer;transition:all .2s;}
+    .vprompt-btn:hover{background:rgba(139,92,246,.45);}
     </style>
 
-    <!-- LinkedIn Image -->
-    <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:8px;">LinkedIn</div>
-    <div class="img-card" id="li-img-card">
-        """ + li_svg + """
-        <div class="img-overlay"></div>
-        <span class="img-plat-tag tag-li">LinkedIn Cover</span>
-        <div class="img-actions">
-            <button class="img-btn img-btn-dl" onclick="dlSvg('li-img-card','linkedin-cover.svg')">⬇ Download</button>
-            <button class="img-btn img-btn-cp" onclick="cpPrompt('""" + li_img_prompt[:200].replace("'","").replace('"','') + """')">Copy Prompt</button>
+    <!-- LinkedIn -->
+    <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:8px;">LinkedIn</div>
+    <div class="vcard" id="li-vcard">
+        <img src='""" + li_img_url + """' alt="LinkedIn visual" onload="this.classList.add('loaded')" onerror="this.style.display='none'">
+        <div class="vcard-fallback">""" + li_svg + """</div>
+        <div class="vcard-bar">
+            <span class="vtag vtag-li">LinkedIn</span>
+            <div style="display:flex;gap:7px;">
+                <button class="vprompt-btn" onclick="cpTxt(this,'""" + li_img_prompt[:180].replace("'","").replace('"','') + """')">Copy Prompt</button>
+                <a href='""" + li_img_url + """' target="_blank" class="vaction-btn">View ↗</a>
+            </div>
         </div>
     </div>
 
-    <!-- Instagram Image -->
-    <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:8px;">Instagram</div>
-    <div class="img-card" id="ig-img-card">
-        """ + ig_svg + """
-        <div class="img-overlay"></div>
-        <span class="img-plat-tag tag-ig">Instagram Post</span>
-        <div class="img-actions">
-            <button class="img-btn img-btn-dl" onclick="dlSvg('ig-img-card','instagram-post.svg')">⬇ Download</button>
-            <button class="img-btn img-btn-cp" onclick="cpPrompt('""" + ig_img_prompt[:200].replace("'","").replace('"','') + """')">Copy Prompt</button>
+    <!-- Instagram -->
+    <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:8px;">Instagram</div>
+    <div class="vcard square" id="ig-vcard">
+        <img src='""" + ig_img_url + """' alt="Instagram visual" onload="this.classList.add('loaded')" onerror="this.style.display='none'">
+        <div class="vcard-fallback">""" + ig_svg + """</div>
+        <div class="vcard-bar">
+            <span class="vtag vtag-ig">Instagram</span>
+            <div style="display:flex;gap:7px;">
+                <button class="vprompt-btn" onclick="cpTxt(this,'""" + ig_img_prompt[:180].replace("'","").replace('"','') + """')">Copy Prompt</button>
+                <a href='""" + ig_img_url + """' target="_blank" class="vaction-btn">View ↗</a>
+            </div>
         </div>
     </div>
 
-    <!-- Twitter Image -->
-    <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:8px;">Twitter / X</div>
-    <div class="img-card" id="tw-img-card">
-        """ + tw_svg + """
-        <div class="img-overlay"></div>
-        <span class="img-plat-tag tag-tw">Twitter Card</span>
-        <div class="img-actions">
-            <button class="img-btn img-btn-dl" onclick="dlSvg('tw-img-card','twitter-card.svg')">⬇ Download</button>
-            <button class="img-btn img-btn-cp" onclick="cpPrompt('""" + tw_img_prompt[:200].replace("'","").replace('"','') + """')">Copy Prompt</button>
+    <!-- Twitter -->
+    <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:8px;">Twitter / X</div>
+    <div class="vcard" style="aspect-ratio:21/9;" id="tw-vcard">
+        <img src='""" + tw_img_url + """' alt="Twitter visual" onload="this.classList.add('loaded')" onerror="this.style.display='none'">
+        <div class="vcard-fallback">""" + tw_svg + """</div>
+        <div class="vcard-bar">
+            <span class="vtag vtag-tw">Twitter / X</span>
+            <div style="display:flex;gap:7px;">
+                <button class="vprompt-btn" onclick="cpTxt(this,'""" + tw_img_prompt[:180].replace("'","").replace('"','') + """')">Copy Prompt</button>
+                <a href='""" + tw_img_url + """' target="_blank" class="vaction-btn">View ↗</a>
+            </div>
         </div>
     </div>
 
-    <div style="font-size:11px;color:rgba(255,255,255,0.25);margin-top:4px;line-height:1.5;">Style: <span style="color:#a78bfa;">""" + img_style + """</span> · SVG — download and use directly, or copy prompt for AI generators (Firefly, Canva AI, Leonardo)</div>
+    <div style="font-size:11px;color:rgba(255,255,255,.22);margin-top:6px;line-height:1.6;">
+        Photos via <a href="https://unsplash.com" target="_blank" style="color:#a78bfa;text-decoration:none;">Unsplash</a> · Copy prompt for AI generators (Midjourney, Firefly, Canva AI)
+    </div>
 </div>
 
 <!-- 7 DAY CALENDAR -->
@@ -805,20 +889,17 @@ function cp(btn,text){
         setTimeout(()=>{btn.textContent=orig;btn.style.color='';},2000);
     });
 }
-function dlSvg(cardId, filename){
-    const card = document.getElementById(cardId);
-    const svg  = card.querySelector('svg');
-    if(!svg) return;
-    const blob = new Blob([svg.outerHTML], {type:'image/svg+xml'});
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href = url; a.download = filename;
-    a.click(); URL.revokeObjectURL(url);
-}
-function cpPrompt(text){
+function cpTxt(btn,text){
     navigator.clipboard.writeText(text).then(()=>{
-        const btns = document.querySelectorAll('.img-btn-cp');
-        btns.forEach(b=>{ if(b.onclick && b.onclick.toString().includes(text.slice(0,20))){ b.textContent='Copied!'; setTimeout(()=>b.textContent='Copy Prompt',2000); } });
+        const orig=btn.textContent;
+        btn.textContent='Copied!';btn.style.color='var(--green)';btn.style.borderColor='var(--green)';
+        setTimeout(()=>{btn.textContent=orig;btn.style.color='';btn.style.borderColor='';},2000);
+    }).catch(()=>{
+        // fallback for non-secure context
+        const ta=document.createElement('textarea');
+        ta.value=text;document.body.appendChild(ta);ta.select();
+        document.execCommand('copy');document.body.removeChild(ta);
+        btn.textContent='Copied!';setTimeout(()=>btn.textContent='Copy Prompt',2000);
     });
 }
 </script>
