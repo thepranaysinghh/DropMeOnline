@@ -403,7 +403,8 @@ def _linkedin_post(hook, goal, audience, mood, trigger, tone, length="default") 
     _i   = parse_intent(goal)
     _p   = _i["product"]
     _ref = _i["product_ref"]
-    _aud = audience or _i["audience"]
+    # Always use intent-parsed audience — it's smarter than raw audience param
+    _aud = _i["audience"] or audience or "professionals"
     # Short mode — clean 3-line insight
     if length == "short":
         return f"{hook}\n\nMost people won't act on this.\n\nYou should."
